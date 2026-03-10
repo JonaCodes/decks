@@ -1,0 +1,7 @@
+input:focus {
+  --input-bd: var(--app-theme-color-translucent-50) !important;
+}
+
+input {
+  font-family: Figtree !important;
+}
