@@ -8,7 +8,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const sequelize = new Sequelize(
   isProduction
     ? (process.env.DB_CONNECTION_STRING as string)
-    : `postgres://postgres:password@localhost:5432/PROJECT_NAME_dev`,
+    : `postgres://postgres:password@localhost:5432/decks_dev`,
   {
     logging: false,
     dialect: 'postgres',

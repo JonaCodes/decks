@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: PROJECT_NAME
+    name: decks
     env: node
     region: frankfurt
     plan: starter

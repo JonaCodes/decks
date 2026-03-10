@@ -11,7 +11,7 @@ if (!supabaseUrl || !supabaseKey) {
   client = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
-      storageKey: 'PROJECT_NAME-auth',
+      storageKey: 'decks-auth',
       storage: window.localStorage,
     },
   });
