@@ -1,4 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Models } from './index';
 
 export default class LlmBatchTask extends Model {
   public id!: number;
@@ -77,7 +78,7 @@ export default class LlmBatchTask extends Model {
     );
   }
 
-  static associate(_: any) {
+  static associate(_: Models) {
     // No associations needed for now
   }
 }

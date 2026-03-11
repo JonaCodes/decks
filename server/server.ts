@@ -6,6 +6,9 @@ import util from 'util';
 import { fileURLToPath } from 'url';
 import sequelize from './config/database';
 import logger from './logger';
+import presentationsRouter from './routes/presentations';
+import templatesRouter from './routes/templates';
+import slidesRouter from './routes/slides';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +57,10 @@ app.use(
 );
 
 app.use(express.json({ limit: '32kb' }));
+
+app.use('/api', presentationsRouter);
+app.use('/api', templatesRouter);
+app.use('/api', slidesRouter);
 
 app.get('/health', (_req, res) => {
   if (serverReady) {

@@ -1,4 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Models } from './index';
 
 export default class LlmTokenUsage extends Model {
   public id!: number;
@@ -75,14 +76,10 @@ export default class LlmTokenUsage extends Model {
     );
   }
 
-  static associate(models: any) {
+  static associate(models: Models) {
     this.belongsTo(models.User, {
       foreignKey: 'user_id',
       as: 'user',
-    });
-    this.belongsTo(models.Workflow, {
-      foreignKey: 'workflow_id',
-      as: 'workflow',
     });
   }
 }

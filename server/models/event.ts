@@ -1,4 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Models } from './index';
 
 export default class Event extends Model {
   public id!: number;
@@ -55,7 +56,7 @@ export default class Event extends Model {
     );
   }
 
-  static associate(models: any) {
+  static associate(models: Models) {
     this.belongsTo(models.User, { foreignKey: 'user_id' });
     this.belongsTo(models.Account, { foreignKey: 'account_id' });
   }
