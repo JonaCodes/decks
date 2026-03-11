@@ -31,4 +31,5 @@ workflowsData.ts
 .kiro
 demo-scripts/*
 
-llm_debates
+client_secret_*.json
+server/.google-slides-oauth-token.json
