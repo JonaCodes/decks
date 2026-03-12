@@ -68,18 +68,7 @@ TEMPLATE_PRESENTATION_ID=your-template-presentation-id
 
 ## Auth model
 
-The add-on runs inside Google Slides as the authenticated user — no separate
-OAuth setup is needed for the add-on itself.
-
-Not active: service account auth and local user OAuth (used by the old
-local-script flow). See
-[`deprecated/server-slides-local-script/slides/auth.service-account.ts`](/Users/jona/Documents/projects/decks/deprecated/server-slides-local-script/slides/auth.service-account.ts)
-for why service account auth was parked.
-
-## Legacy: local-script flow
-
-These files have been moved to `deprecated/server-slides-local-script/`. See the
-README there for details on how to revive the flow if needed.
+The add-on runs inside Google Slides as the authenticated user
 
 ## Known limits
 
