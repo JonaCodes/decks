@@ -33,3 +33,4 @@ demo-scripts/*
 
 client_secret_*.json
 server/.google-slides-oauth-token.json
+certs/

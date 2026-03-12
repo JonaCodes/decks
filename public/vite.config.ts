@@ -1,12 +1,26 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
+import fs from 'fs';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   const isDev = mode === 'development';
-  const backendUrl = isDev ? 'http://localhost:3000' : env.VITE_BACKEND_URL;
+
+  // Use mkcert certs for Vite HTTPS dev server if available
+  const certPath = env.SSL_CERT_PATH;
+  const keyPath = env.SSL_KEY_PATH;
+  const httpsConfig =
+    certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)
+      ? { cert: fs.readFileSync(certPath), key: fs.readFileSync(keyPath) }
+      : undefined;
+
+  const backendUrl = isDev
+    ? httpsConfig
+      ? 'https://localhost:3000'
+      : 'http://localhost:3000'
+    : env.VITE_BACKEND_URL;
 
   return {
     plugins: [react()],
@@ -15,11 +29,13 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          addon: path.resolve(__dirname, 'addon.html'),
+        },
         output: {
           manualChunks: {
-            // Core React runtime
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            // UI framework
             'vendor-mantine': [
               '@mantine/core',
               '@mantine/hooks',
@@ -28,17 +44,15 @@ export default defineConfig(({ mode }) => {
               '@mantine/carousel',
               '@mantine/dropzone',
             ],
-            // State management
             'vendor-mobx': ['mobx', 'mobx-react-lite'],
-            // Icons (can be large)
             'vendor-icons': ['@tabler/icons-react'],
-            // Supabase client
             'vendor-supabase': ['@supabase/supabase-js'],
           },
         },
       },
     },
     server: {
+      https: httpsConfig,
       proxy: {
         '^/auth/(?!callback).*': {
           target: backendUrl,

@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        height: 100vh;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+      #loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        color: #666;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading">Loading…</div>
+    <iframe id="sidebar-frame" style="display: none"></iframe>
+
+    <script>
+      var SIDEBAR_URL = '<?= getBackendUrl() ?>/addon';
+
+      var frame = document.getElementById('sidebar-frame');
+      var loading = document.getElementById('loading');
+
+      frame.onload = function () {
+        loading.style.display = 'none';
+        frame.style.display = 'block';
+      };
+
+      frame.src = SIDEBAR_URL;
+
+      // Listen for messages from the iframe and relay them to Apps Script
+      window.addEventListener('message', function (event) {
+        var msg = event.data;
+        if (!msg || typeof msg !== 'object') return;
+
+        if (msg.type === 'testBridge') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'testBridgeResult', result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'testBridgeResult', error: String(err) },
+                '*'
+              );
+            })
+            .testBridge();
+        }
+
+        if (msg.type === 'insertSlide') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'insertSlideResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'insertSlideResult', id: msg.id, error: String(err) },
+                '*'
+              );
+            })
+            .insertTemplateSlide(msg.payload);
+        }
+      });
+    </script>
+  </body>
+</html>

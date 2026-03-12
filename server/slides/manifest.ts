@@ -1,22 +1,17 @@
-export type FieldType = 'text' | 'image';
+import type {
+  FieldType,
+  TemplateField,
+  TemplateDefinition,
+} from '@shared/templates/types.js';
 
-export interface TemplateField {
-  name: string;
-  type: FieldType;
-  required: boolean;
-}
-
-export interface TemplateDefinition {
-  templateKey: string;
-  description: string;
-  fields: TemplateField[];
-}
+export type { FieldType, TemplateField, TemplateDefinition };
 
 export type SlidePayload = Record<string, string> & { slide_template: string };
 
 export const MANIFEST: TemplateDefinition[] = [
   {
     templateKey: 'A',
+    name: 'Image with caption',
     description: 'Single image with caption',
     fields: [
       { name: 'text', type: 'text', required: true },
@@ -25,6 +20,7 @@ export const MANIFEST: TemplateDefinition[] = [
   },
   {
     templateKey: 'B',
+    name: 'Three text points',
     description: 'Three text points',
     fields: [
       { name: 'text1', type: 'text', required: true },

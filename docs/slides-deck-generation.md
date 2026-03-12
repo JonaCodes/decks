@@ -2,101 +2,88 @@
 
 ## Purpose
 
-Use this when working on the Google Slides template generator in `server/slides/`.
+Use this when working on the Google Slides add-on flow that inserts template
+slides into a user's active presentation.
 
-## What the flow does
+## What the flow does (add-on)
 
-1. Copy a template presentation
-2. Discover template slides by speaker notes marker
-3. Duplicate requested template slides in payload order
-4. Replace text placeholders
-5. Replace tagged image slots
-6. Remove the original template slides
+1. User opens the "Decks" sidebar via the add-on menu in Google Slides.
+2. The React sidebar UI (`public/src/addon/`) fetches available templates from
+   `GET /api/templates` on the Express server.
+3. User picks a template, fills in the fields, and submits.
+4. The sidebar sends a `postMessage` via `bridge.ts` → `Sidebar.html` →
+   `google.script.run` (Apps Script).
+5. `SlideOps.gs` finds the matching template slide in the template deck (by
+   `template_key` in speaker notes), copies it into the active presentation,
+   replaces `{{FIELD}}` text placeholders, and swaps `slot:field` image
+   placeholders.
 
-## How to use this flow
+## Main code
 
-1. Define or update templates in [`server/slides/manifest.ts`](/Users/jona/Documents/projects/decks/server/slides/manifest.ts).
-   This is where template keys, descriptions, and allowed fields are mapped.
-2. Make the matching template slides in Google Slides.
-   Add `template_key: X` in speaker notes, `{{FIELD_NAME}}` for text, and `slot:field_name` in image alt-text.
-3. Create the slide payload in [`server/scripts/generate-deck.ts`](/Users/jona/Documents/projects/decks/server/scripts/generate-deck.ts).
-   The `slides` array is the actual content and final slide order for the generated deck.
-4. Run the generator:
-   ```bash
-   npx tsx server/scripts/generate-deck.ts
-   ```
-5. Open the returned deck URL.
+- [`addon/Code.gs`](/Users/jona/Documents/projects/decks/addon/Code.gs) — add-on
+  entry point (`onOpen`, `showSidebar`)
+- [`addon/SlideOps.gs`](/Users/jona/Documents/projects/decks/addon/SlideOps.gs)
+  — core slide-insert logic (Apps Script)
+- [`addon/Sidebar.html`](/Users/jona/Documents/projects/decks/addon/Sidebar.html)
+  — iframe wrapper + postMessage bridge
+- [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
+  — React sidebar UI (`AddonApp`, `TemplateForm`, `ChatBox`, `bridge.ts`)
+- [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
+  — `GET /api/templates`, `POST /api/plan-slides` (stub for future LLM slide
+  planning from the chat box)
+- [`shared/templates/types.ts`](/Users/jona/Documents/projects/decks/shared/templates/types.ts)
+  — canonical shared types used by both server and frontend
 
-Main code:
+## Deployment
 
-- [`server/slides/auth.ts`](/Users/jona/Documents/projects/decks/server/slides/auth.ts)
-- [`server/slides/manifest.ts`](/Users/jona/Documents/projects/decks/server/slides/manifest.ts)
-- [`server/slides/discovery.ts`](/Users/jona/Documents/projects/decks/server/slides/discovery.ts)
-- [`server/slides/request-builder.ts`](/Users/jona/Documents/projects/decks/server/slides/request-builder.ts)
-- [`server/slides/generate.ts`](/Users/jona/Documents/projects/decks/server/slides/generate.ts)
-- [`server/scripts/generate-deck.ts`](/Users/jona/Documents/projects/decks/server/scripts/generate-deck.ts)
+Push add-on code to Apps Script via clasp:
 
-## Auth model
+```bash
+pnpm addon:push
+```
 
-Active path: local user OAuth.
+The server must be running with HTTPS (mkcert) so the sidebar iframe can reach
+it from the Google Slides origin.
 
-Not active: service account auth. See [`server/slides/auth.service-account.ts`](/Users/jona/Documents/projects/decks/server/slides/auth.service-account.ts) for why it was parked and the future workaround.
+## Template deck contract
+
+For each template slide in the template presentation:
+
+- speaker notes must include `template_key: X`
+- text placeholders use `{{FIELD_NAME}}`
+- image placeholders use image alt-text description `slot:field_name`
+
+Current manifest (`server/slides/manifest.ts`):
+
+- Template `A`: `text`, `img_url`
+- Template `B`: `text1`, `text2`, optional `text3`
 
 ## Required server env
 
 Add these to [`server/.env`](/Users/jona/Documents/projects/decks/server/.env):
 
 ```env
-GOOGLE_OAUTH_CLIENT_SECRET_PATH=/absolute/path/to/oauth-client.json
 TEMPLATE_PRESENTATION_ID=your-template-presentation-id
 ```
 
-Optional:
+## Auth model
 
-```env
-GOOGLE_OAUTH_TOKEN_PATH=/absolute/path/to/local-token-cache.json
-```
+The add-on runs inside Google Slides as the authenticated user — no separate
+OAuth setup is needed for the add-on itself.
 
-## Google Cloud setup
+Not active: service account auth and local user OAuth (used by the old
+local-script flow). See
+[`deprecated/server-slides-local-script/slides/auth.service-account.ts`](/Users/jona/Documents/projects/decks/deprecated/server-slides-local-script/slides/auth.service-account.ts)
+for why service account auth was parked.
 
-In one Google Cloud project:
+## Legacy: local-script flow
 
-- enable `Google Drive API`
-- enable `Google Slides API`
-- configure an OAuth consent screen
-- create an OAuth client of type `Desktop app`
-- if the app is in testing mode, add the developer Google account as a test user
-
-Scopes used by the code:
-
-- `https://www.googleapis.com/auth/drive`
-- `https://www.googleapis.com/auth/presentations`
-
-## Template deck contract
-
-For each template slide:
-
-- speaker notes must include `template_key: X`
-- text placeholders use `{{FIELD_NAME}}`
-- image placeholders use image alt-text description `slot:field_name`
-
-Current manifest:
-
-- Template `A`: `text`, `img_url`
-- Template `B`: `text1`, `text2`, optional `text3`
-
-## First run
-
-Run:
-
-```bash
-npx tsx server/scripts/generate-deck.ts
-```
-
-On first run, the script prints a Google auth URL. Approve access, then copy the final `http://localhost/...` URL from the browser address bar and paste it back into the terminal. The browser page itself is expected to fail to load.
+These files have been moved to `deprecated/server-slides-local-script/`. See the
+README there for details on how to revive the flow if needed.
 
 ## Known limits
 
-- This is a local POC flow, not a production auth setup.
-- The sample script uses a hardcoded payload.
-- Repo-wide TypeScript may have unrelated errors outside the Slides flow; validate touched Slides files directly if needed.
+- `POST /api/plan-slides` is a stub — LLM-based slide planning from the chat box
+  is not yet implemented.
+- Repo-wide TypeScript may have unrelated errors outside the active flow;
+  validate touched files directly if needed.
