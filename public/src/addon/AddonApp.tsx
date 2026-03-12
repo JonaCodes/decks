@@ -9,13 +9,11 @@ import {
   TextInput,
 } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
-import redaxios from 'redaxios';
 import type { TemplateDefinition } from '@shared/templates/types.js';
+import { sendDiscoverTemplates } from './bridge.js';
 import { TemplateList } from './TemplateList.js';
 import { TemplateForm } from './TemplateForm.js';
 import { ChatBox } from './ChatBox.js';
-
-const API_BASE = (import.meta.env.VITE_BACKEND_URL ?? '') + '/api';
 
 type View = 'browse' | 'form';
 
@@ -33,10 +31,9 @@ export function AddonApp() {
     setLoadingTemplates(true);
     setFetchError(null);
 
-    redaxios
-      .get<TemplateDefinition[]>(`${API_BASE}/templates`)
-      .then((res) => {
-        if (!cancelled) setTemplates(res.data);
+    sendDiscoverTemplates()
+      .then((data) => {
+        if (!cancelled) setTemplates(data);
       })
       .catch((err) => {
         if (!cancelled)

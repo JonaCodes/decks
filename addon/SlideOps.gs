@@ -2,6 +2,50 @@
 
 var SlideOps = (function () {
   /**
+   * Discover all template definitions by scanning the template deck.
+   * Reads speaker notes for template_key/name/description and scans slide
+   * elements for {{FIELD}} text placeholders and slot:field image placeholders.
+   * @returns {Array<{ templateKey: string, name: string, description: string, fields: Array }>}
+   */
+  function discoverTemplates() {
+    var templatePresentationId =
+      PropertiesService.getScriptProperties().getProperty(
+        'TEMPLATE_PRESENTATION_ID'
+      );
+    if (!templatePresentationId) {
+      throw new Error('TEMPLATE_PRESENTATION_ID not set in Script Properties');
+    }
+
+    var templatePresentation = SlidesApp.openById(templatePresentationId);
+    var slides = templatePresentation.getSlides();
+    var results = [];
+
+    for (var i = 0; i < slides.length; i++) {
+      var notes = slides[i]
+        .getNotesPage()
+        .getSpeakerNotesShape()
+        .getText()
+        .asString();
+
+      var templateKey = _parseNoteValue(notes, 'template_key');
+      if (!templateKey) continue;
+
+      var name = _parseNoteValue(notes, 'name') || templateKey;
+      var description = _parseNoteValue(notes, 'description') || '';
+      var fields = _discoverSlideFields(slides[i]);
+
+      results.push({
+        templateKey: templateKey,
+        name: name,
+        description: description,
+        fields: fields,
+      });
+    }
+
+    return results;
+  }
+
+  /**
    * Insert a template slide after the current slide in the active presentation.
    * @param {Object} payload - { templateKey: string, values: Record<string, string> }
    * @returns {{ slideObjectId: string }}
@@ -9,15 +53,6 @@ var SlideOps = (function () {
   function insertTemplateSlide(payload) {
     var templateKey = payload.templateKey;
     var values = payload.values || {};
-
-    // Validate required fields
-    var templateDef = _getTemplateDef(templateKey);
-    for (var i = 0; i < templateDef.fields.length; i++) {
-      var field = templateDef.fields[i];
-      if (field.required && !values[field.name]) {
-        throw new Error('Missing required field: ' + field.name);
-      }
-    }
 
     var templatePresentationId =
       PropertiesService.getScriptProperties().getProperty(
@@ -32,6 +67,15 @@ var SlideOps = (function () {
     var templateSlide = _findTemplateSlide(templatePresentation, templateKey);
     if (!templateSlide) {
       throw new Error('Template slide not found for key: ' + templateKey);
+    }
+
+    // Validate required fields by discovering them from the template slide
+    var fields = _discoverSlideFields(templateSlide);
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      if (field.required && !values[field.name]) {
+        throw new Error('Missing required field: ' + field.name);
+      }
     }
 
     // Determine insert position in the active presentation
@@ -55,19 +99,20 @@ var SlideOps = (function () {
     // Copy template slide into active presentation
     var inserted = activePresentation.insertSlide(insertIndex, templateSlide);
 
-    // Replace text placeholders: {{FIELD_NAME_UPPERCASE}}
-    var textFields = templateDef.fields.filter(function (f) {
+    // Replace text placeholders: {{FIELD_NAME_UPPERCASE}} or {{?FIELD_NAME_UPPERCASE}}
+    var textFields = fields.filter(function (f) {
       return f.type === 'text';
     });
     for (var k = 0; k < textFields.length; k++) {
       var fieldName = textFields[k].name;
-      var placeholder = '{{' + fieldName.toUpperCase() + '}}';
       var val = values[fieldName] || '';
-      inserted.replaceAllText(placeholder, val);
+      // Replace both required {{FIELD}} and optional {{?FIELD}} variants
+      inserted.replaceAllText('{{' + fieldName.toUpperCase() + '}}', val);
+      inserted.replaceAllText('{{?' + fieldName.toUpperCase() + '}}', val);
     }
 
     // Replace image placeholders: shapes/images with alt-text "slot:field_name"
-    var imageFields = templateDef.fields.filter(function (f) {
+    var imageFields = fields.filter(function (f) {
       return f.type === 'image';
     });
     for (var m = 0; m < imageFields.length; m++) {
@@ -83,28 +128,80 @@ var SlideOps = (function () {
   // ─── Private helpers ───────────────────────────────────────────────────────
 
   /**
-   * Get template definition from script properties or hardcoded fallback.
-   * In v1 the definitions are inlined here; a future version can fetch from the backend.
+   * Parse a "key: value" line from speaker notes text.
+   * Returns the trimmed value string, or null if not found.
    */
-  function _getTemplateDef(templateKey) {
-    var defs = {
-      A: {
-        fields: [
-          { name: 'text', type: 'text', required: true },
-          { name: 'img_url', type: 'image', required: true },
-        ],
-      },
-      B: {
-        fields: [
-          { name: 'text1', type: 'text', required: true },
-          { name: 'text2', type: 'text', required: true },
-          { name: 'text3', type: 'text', required: false },
-        ],
-      },
-    };
-    var def = defs[templateKey];
-    if (!def) throw new Error('Unknown template key: ' + templateKey);
-    return def;
+  function _parseNoteValue(notes, key) {
+    var lines = notes.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      var prefix = key + ':';
+      if (line.indexOf(prefix) === 0) {
+        return line.slice(prefix.length).trim() || null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Discover fields from a single template slide by scanning its elements.
+   * - Text elements containing {{FIELD}} → required text field
+   * - Text elements containing {{?FIELD}} → optional text field
+   * - Page elements with description "slot:field_name" → required image field
+   * Returns deduplicated array of { name, type, required }.
+   */
+  function _discoverSlideFields(slide) {
+    var fields = [];
+    var seen = {};
+    var elements = slide.getPageElements();
+
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i];
+
+      // Check for image slot via description
+      try {
+        var desc = el.getDescription ? el.getDescription() : '';
+        if (desc && desc.indexOf('slot:') === 0) {
+          var imgField = desc.slice('slot:'.length).trim();
+          if (imgField && !seen[imgField]) {
+            seen[imgField] = true;
+            fields.push({ name: imgField, type: 'image', required: true });
+          }
+        }
+      } catch (e) {
+        // Some element types don't support getDescription; skip.
+      }
+
+      // Check for text placeholders in text content
+      try {
+        var shape = el.asShape ? el.asShape() : null;
+        if (shape) {
+          var text = shape.getText().asString();
+          // Match {{?FIELD}} (optional) — must check before required pattern
+          var optMatches = text.match(/\{\{\?([A-Z0-9_]+)\}\}/gi) || [];
+          for (var oi = 0; oi < optMatches.length; oi++) {
+            var optName = optMatches[oi].replace(/\{\{\?|\}\}/g, '').toLowerCase();
+            if (!seen[optName]) {
+              seen[optName] = true;
+              fields.push({ name: optName, type: 'text', required: false });
+            }
+          }
+          // Match {{FIELD}} (required)
+          var reqMatches = text.match(/\{\{([A-Z0-9_]+)\}\}/gi) || [];
+          for (var ri = 0; ri < reqMatches.length; ri++) {
+            var reqName = reqMatches[ri].replace(/\{\{|\}\}/g, '').toLowerCase();
+            if (!seen[reqName]) {
+              seen[reqName] = true;
+              fields.push({ name: reqName, type: 'text', required: true });
+            }
+          }
+        }
+      } catch (e) {
+        // Element is not a shape or has no text; skip.
+      }
+    }
+
+    return fields;
   }
 
   /**
@@ -162,5 +259,8 @@ var SlideOps = (function () {
     throw new Error('Image placeholder not found for field: ' + fieldName);
   }
 
-  return { insertTemplateSlide: insertTemplateSlide };
+  return {
+    insertTemplateSlide: insertTemplateSlide,
+    discoverTemplates: discoverTemplates,
+  };
 })();

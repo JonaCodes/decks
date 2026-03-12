@@ -1,4 +1,7 @@
-import type { InsertSlideResponse } from '@shared/templates/types.js';
+import type {
+  InsertSlideResponse,
+  TemplateDefinition,
+} from '@shared/templates/types.js';
 
 type PendingResolver = {
   resolve: (value: unknown) => void;
@@ -14,6 +17,17 @@ function generateId(): string {
 window.addEventListener('message', (event) => {
   const data = event.data;
   if (!data || typeof data !== 'object') return;
+
+  if (data.type === 'discoverTemplatesResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) {
+      p.reject(new Error(data.error));
+    } else {
+      p.resolve(data.result);
+    }
+  }
 
   if (data.type === 'insertSlideResult') {
     const p = pending.get(data.id);
@@ -49,6 +63,14 @@ export function sendInsertSlide(
       { type: 'insertSlide', id, payload: { templateKey, values } },
       '*'
     );
+  });
+}
+
+export function sendDiscoverTemplates(): Promise<TemplateDefinition[]> {
+  const id = generateId();
+  return new Promise<TemplateDefinition[]>((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage({ type: 'discoverTemplates', id }, '*');
   });
 }
 

@@ -35,3 +35,11 @@ function testBridge() {
 function insertTemplateSlide(payload) {
   return SlideOps.insertTemplateSlide(payload);
 }
+
+/**
+ * Discover template definitions directly from the template deck.
+ * Returns TemplateDefinition[] by scanning slide speaker notes and placeholders.
+ */
+function discoverTemplates() {
+  return SlideOps.discoverTemplates();
+}

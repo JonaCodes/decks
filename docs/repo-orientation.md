@@ -14,9 +14,7 @@ live.
   (`AddonApp`, `TemplateForm`, `ChatBox`, `bridge.ts`)
 - `server/`: Express server, integrations, scripts
 - `server/routes/`: Express route handlers (`templates.ts` —
-  `GET /api/templates`, `POST /api/plan-slides`)
-- `server/slides/`: Google Slides generation helpers (largely from the old
-  local-script flow)
+  `POST /api/plan-slides`)
 - `server/scripts/`: local entrypoints and one-off scripts (legacy)
 - `shared/`: types shared between server and frontend
   (`shared/templates/types.ts`)

@@ -84,6 +84,27 @@
             })
             .insertTemplateSlide(msg.payload);
         }
+
+        if (msg.type === 'discoverTemplates') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'discoverTemplatesResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                {
+                  type: 'discoverTemplatesResult',
+                  id: msg.id,
+                  error: String(err),
+                },
+                '*'
+              );
+            })
+            .discoverTemplates();
+        }
       });
     </script>
   </body>

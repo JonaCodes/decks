@@ -8,8 +8,10 @@ slides into a user's active presentation.
 ## What the flow does (add-on)
 
 1. User opens the "Decks" sidebar via the add-on menu in Google Slides.
-2. The React sidebar UI (`public/src/addon/`) fetches available templates from
-   `GET /api/templates` on the Express server.
+2. The React sidebar UI (`public/src/addon/`) fetches available templates via
+   `bridge.ts` → `Sidebar.html` → `google.script.run`, which calls
+   `SlideOps.discoverTemplates()` in Apps Script to read template metadata
+   directly from the template deck's speaker notes at runtime.
 3. User picks a template, fills in the fields, and submits.
 4. The sidebar sends a `postMessage` via `bridge.ts` → `Sidebar.html` →
    `google.script.run` (Apps Script).
@@ -23,14 +25,15 @@ slides into a user's active presentation.
 - [`addon/Code.gs`](/Users/jona/Documents/projects/decks/addon/Code.gs) — add-on
   entry point (`onOpen`, `showSidebar`)
 - [`addon/SlideOps.gs`](/Users/jona/Documents/projects/decks/addon/SlideOps.gs)
-  — core slide-insert logic (Apps Script)
+  — core slide-insert logic and `discoverTemplates()` (Apps Script)
 - [`addon/Sidebar.html`](/Users/jona/Documents/projects/decks/addon/Sidebar.html)
   — iframe wrapper + postMessage bridge
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
   — React sidebar UI (`AddonApp`, `TemplateForm`, `ChatBox`, `bridge.ts`)
 - [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
-  — `GET /api/templates`, `POST /api/plan-slides` (stub for future LLM slide
-  planning from the chat box)
+  — `POST /api/plan-slides` (stub for future LLM slide planning from the chat
+  box; `GET /api/templates` removed — templates are now discovered via Apps
+  Script)
 - [`shared/templates/types.ts`](/Users/jona/Documents/projects/decks/shared/templates/types.ts)
   — canonical shared types used by both server and frontend
 
@@ -49,14 +52,16 @@ it from the Google Slides origin.
 
 For each template slide in the template presentation:
 
-- speaker notes must include `template_key: X`
-- text placeholders use `{{FIELD_NAME}}`
+- speaker notes must include:
+  - `template_key: X` — unique key used to look up the slide
+  - `name: My Template Name` — human-readable name shown in the sidebar
+  - `description: Short description` — shown in the sidebar
+- text placeholders use `{{FIELD_NAME}}` (required) or `{{?FIELD_NAME}}`
+  (optional — omitted from the form if not filled in)
 - image placeholders use image alt-text description `slot:field_name`
 
-Current manifest (`server/slides/manifest.ts`):
-
-- Template `A`: `text`, `img_url`
-- Template `B`: `text1`, `text2`, optional `text3`
+Template metadata is auto-discovered at runtime from these speaker notes by
+`SlideOps.discoverTemplates()` — no separate manifest file is needed.
 
 ## Required server env
 
