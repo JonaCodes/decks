@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
   Box,
-  Center,
-  Loader,
+  Card,
   ScrollArea,
+  Skeleton,
   Stack,
   Text,
   TextInput,
@@ -16,6 +16,22 @@ import { TemplateForm } from './TemplateForm.js';
 import { ChatBox } from './ChatBox.js';
 
 type View = 'browse' | 'form';
+
+function LoadingTemplateSkeletons() {
+  return (
+    <Stack gap='xs' py='xs'>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} padding='xs' radius='sm' withBorder>
+          <Stack gap={6}>
+            <Skeleton height={128} radius={0} />
+            <Skeleton height={14} width='70%' />
+            <Skeleton height={12} width='40%' />
+          </Stack>
+        </Card>
+      ))}
+    </Stack>
+  );
+}
 
 export function AddonApp() {
   const [view, setView] = useState<View>('browse');
@@ -107,14 +123,7 @@ export function AddonApp() {
       {/* Template list — scrollable middle section */}
       <ScrollArea style={{ flex: 1 }} px='xs'>
         {loadingTemplates ? (
-          <Center py='xl'>
-            <Stack align='center' gap='xs'>
-              <Loader size='sm' />
-              <Text size='xs' c='dimmed'>
-                Loading templates…
-              </Text>
-            </Stack>
-          </Center>
+          <LoadingTemplateSkeletons />
         ) : fetchError ? (
           <Text size='xs' c='red' ta='center' py='md'>
             {fetchError}

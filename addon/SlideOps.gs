@@ -34,11 +34,24 @@ var SlideOps = (function () {
       var description = _parseNoteValue(notes, 'description') || '';
       var fields = _discoverSlideFields(slides[i]);
 
+      var thumbnailUrl = null;
+      try {
+        var thumb = Slides.Presentations.Pages.getThumbnail(
+          templatePresentationId,
+          slides[i].getObjectId(),
+          { 'thumbnailProperties.thumbnailSize': 'MEDIUM' }
+        );
+        thumbnailUrl = thumb.contentUrl || null;
+      } catch (e) {
+        Logger.log('Thumbnail fetch failed for ' + templateKey + ': ' + e);
+      }
+
       results.push({
         templateKey: templateKey,
         name: name,
         description: description,
         fields: fields,
+        thumbnailUrl: thumbnailUrl,
       });
     }
 
@@ -180,7 +193,9 @@ var SlideOps = (function () {
           // Match {{?FIELD}} (optional) — must check before required pattern
           var optMatches = text.match(/\{\{\?([A-Z0-9_]+)\}\}/gi) || [];
           for (var oi = 0; oi < optMatches.length; oi++) {
-            var optName = optMatches[oi].replace(/\{\{\?|\}\}/g, '').toLowerCase();
+            var optName = optMatches[oi]
+              .replace(/\{\{\?|\}\}/g, '')
+              .toLowerCase();
             if (!seen[optName]) {
               seen[optName] = true;
               fields.push({ name: optName, type: 'text', required: false });
@@ -189,7 +204,9 @@ var SlideOps = (function () {
           // Match {{FIELD}} (required)
           var reqMatches = text.match(/\{\{([A-Z0-9_]+)\}\}/gi) || [];
           for (var ri = 0; ri < reqMatches.length; ri++) {
-            var reqName = reqMatches[ri].replace(/\{\{|\}\}/g, '').toLowerCase();
+            var reqName = reqMatches[ri]
+              .replace(/\{\{|\}\}/g, '')
+              .toLowerCase();
             if (!seen[reqName]) {
               seen[reqName] = true;
               fields.push({ name: reqName, type: 'text', required: true });

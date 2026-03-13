@@ -1,0 +1,8 @@
+.card:hover {
+  cursor: pointer;
+  transform: scale(1.01);
+}
+
+.card:active {
+  transform: scale(0.99);
+}

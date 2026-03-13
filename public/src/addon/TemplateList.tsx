@@ -33,7 +33,7 @@ export function TemplateList({
   }
 
   return (
-    <Stack gap='xs'>
+    <Stack gap='lg'>
       {filtered.map((template) => (
         <TemplateCard
           key={template.templateKey}

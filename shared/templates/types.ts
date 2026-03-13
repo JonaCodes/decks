@@ -11,6 +11,7 @@ export interface TemplateDefinition {
   name: string;
   description: string;
   fields: TemplateField[];
+  thumbnailUrl?: string;
 }
 
 export interface InsertSlideRequest {
