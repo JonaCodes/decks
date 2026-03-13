@@ -29,6 +29,9 @@ slides into a user's active presentation.
   entry point (`onOpen`, `showSidebar`)
 - [`addon/SlideOps.gs`](/Users/jona/Documents/projects/decks/addon/SlideOps.gs)
   — core slide-insert logic and `discoverTemplates()` (Apps Script)
+- [`addon/SlideHelpers.gs`](/Users/jona/Documents/projects/decks/addon/SlideHelpers.gs)
+  — private helpers used by `SlideOps.gs` (`_parseNoteValue`, `_discoverSlideFields`,
+  `_findTemplateSlide`, `_replaceImagePlaceholder`)
 - [`addon/appsscript.json`](/Users/jona/Documents/projects/decks/addon/appsscript.json)
   — declares the Slides Advanced Service (`enabledAdvancedServices`) and the
   `script.external_request` scope (`UrlFetchApp`) required for thumbnail fetching

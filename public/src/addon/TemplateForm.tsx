@@ -67,6 +67,7 @@ export function TemplateForm({
           size='xs'
           onClick={onCancel}
           disabled={loading}
+          color='#FFBA00'
         >
           <IconX size={14} />
         </Button>
@@ -128,11 +129,13 @@ export function TemplateForm({
       <Button
         radius={0}
         type='submit'
-        size='xs'
+        size='md'
         disabled={loading || success}
+        color='#FFBA00'
+        c='black'
         leftSection={loading ? <Loader size={12} color='white' /> : undefined}
       >
-        {loading ? 'Inserting…' : 'Insert Slide'}
+        {loading ? 'Inserting…' : 'Insert slide'}
       </Button>
     </form>
   );
