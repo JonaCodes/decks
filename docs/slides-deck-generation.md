@@ -11,9 +11,10 @@ slides into a user's active presentation.
 2. The React sidebar UI (`public/src/addon/`) fetches available templates via
    `bridge.ts` → `Sidebar.html` → `google.script.run`, which calls
    `SlideOps.discoverTemplates()` in Apps Script to read template metadata
-   directly from the template deck's speaker notes at runtime. A thumbnail URL
-   is also fetched per slide via the Slides Advanced Service and included as
-   `thumbnailUrl` in each template definition.
+   directly from the template deck's speaker notes at runtime. Each slide's
+   thumbnail is fetched server-side via `UrlFetchApp` (bypassing Google CDN's
+   cross-origin 429), encoded as a base64 data URL, and cached for 6 hours via
+   `CacheService` — so the browser never makes a direct request to Google's CDN.
 3. User picks a template, fills in the fields, and submits.
 4. The sidebar sends a `postMessage` via `bridge.ts` → `Sidebar.html` →
    `google.script.run` (Apps Script).
@@ -29,8 +30,8 @@ slides into a user's active presentation.
 - [`addon/SlideOps.gs`](/Users/jona/Documents/projects/decks/addon/SlideOps.gs)
   — core slide-insert logic and `discoverTemplates()` (Apps Script)
 - [`addon/appsscript.json`](/Users/jona/Documents/projects/decks/addon/appsscript.json)
-  — declares the Slides Advanced Service (`enabledAdvancedServices`) required
-  for thumbnail fetching via `Slides.Presentations.Pages.getThumbnail()`
+  — declares the Slides Advanced Service (`enabledAdvancedServices`) and the
+  `script.external_request` scope (`UrlFetchApp`) required for thumbnail fetching
 - [`addon/Sidebar.html`](/Users/jona/Documents/projects/decks/addon/Sidebar.html)
   — iframe wrapper + postMessage bridge
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)

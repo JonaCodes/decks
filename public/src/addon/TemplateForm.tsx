@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Alert,
-  Badge,
   Button,
   Divider,
   Group,
@@ -10,9 +9,10 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { IconAlertCircle, IconArrowLeft, IconCheck } from '@tabler/icons-react';
+import { IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react';
 import type { TemplateDefinition } from '@shared/templates/types.js';
 import { sendInsertSlide } from './bridge.js';
+import TemplateThumbnail from './TemplateThumbnail.js';
 
 interface TemplateFormProps {
   template: TemplateDefinition;
@@ -59,24 +59,21 @@ export function TemplateForm({
       onSubmit={handleSubmit}
       style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
     >
+      <Group justify='space-between' px='xs' py='xs'>
+        <Text size='sm'>{template.name}</Text>
+        <Button
+          justify='end'
+          variant='subtle'
+          size='xs'
+          onClick={onCancel}
+          disabled={loading}
+        >
+          <IconX size={14} />
+        </Button>
+      </Group>
+      <Divider />
       <Stack gap='sm' style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-        {/* Header */}
-        <Stack gap={4}>
-          <Text fw={600} size='sm'>
-            {template.name}
-          </Text>
-          <Text size='xs' c='dimmed'>
-            {template.description}
-          </Text>
-          <Group gap='xs'>
-            <Badge size='xs' variant='light' color='blue'>
-              {template.fields.length}{' '}
-              {template.fields.length === 1 ? 'field' : 'fields'}
-            </Badge>
-          </Group>
-        </Stack>
-
-        <Divider />
+        <TemplateThumbnail template={template} />
 
         {/* Fields */}
         {template.fields.length === 0 ? (
@@ -84,19 +81,24 @@ export function TemplateForm({
             This template has no fields.
           </Text>
         ) : (
-          template.fields.map((field) => (
-            <TextInput
-              key={field.name}
-              label={field.name}
-              placeholder={
-                field.type === 'image' ? 'Image URL' : `Enter ${field.name}`
-              }
-              required={field.required}
-              value={values[field.name] ?? ''}
-              onChange={(e) => handleChange(field.name, e.currentTarget.value)}
-              size='xs'
-            />
-          ))
+          template.fields
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((field) => (
+              <TextInput
+                autoFocus={field.name === template.fields[0].name}
+                key={field.name}
+                label={field.name}
+                placeholder={
+                  field.type === 'image' ? 'Image URL' : `Enter ${field.name}`
+                }
+                required={field.required}
+                value={values[field.name] ?? ''}
+                onChange={(e) =>
+                  handleChange(field.name, e.currentTarget.value)
+                }
+                size='xs'
+              />
+            ))
         )}
 
         {/* Feedback */}
@@ -123,27 +125,15 @@ export function TemplateForm({
         )}
       </Stack>
 
-      {/* Actions */}
-      <Divider />
-      <Group gap='xs' p='xs' justify='flex-end'>
-        <Button
-          variant='subtle'
-          size='xs'
-          leftSection={<IconArrowLeft size={14} />}
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Back
-        </Button>
-        <Button
-          type='submit'
-          size='xs'
-          disabled={loading || success}
-          leftSection={loading ? <Loader size={12} color='white' /> : undefined}
-        >
-          {loading ? 'Inserting…' : 'Insert Slide'}
-        </Button>
-      </Group>
+      <Button
+        radius={0}
+        type='submit'
+        size='xs'
+        disabled={loading || success}
+        leftSection={loading ? <Loader size={12} color='white' /> : undefined}
+      >
+        {loading ? 'Inserting…' : 'Insert Slide'}
+      </Button>
     </form>
   );
 }

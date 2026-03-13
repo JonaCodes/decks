@@ -36,12 +36,24 @@ var SlideOps = (function () {
 
       var thumbnailUrl = null;
       try {
-        var thumb = Slides.Presentations.Pages.getThumbnail(
-          templatePresentationId,
-          slides[i].getObjectId(),
-          { 'thumbnailProperties.thumbnailSize': 'MEDIUM' }
-        );
-        thumbnailUrl = thumb.contentUrl || null;
+        var cache = CacheService.getScriptCache();
+        var cacheKey = 'thumb_' + slides[i].getObjectId();
+        var cached = cache.get(cacheKey);
+        if (cached) {
+          thumbnailUrl = cached;
+        } else {
+          var thumb = Slides.Presentations.Pages.getThumbnail(
+            templatePresentationId,
+            slides[i].getObjectId(),
+            { 'thumbnailProperties.thumbnailSize': 'MEDIUM' }
+          );
+          if (thumb.contentUrl) {
+            var imgResponse = UrlFetchApp.fetch(thumb.contentUrl);
+            var base64 = Utilities.base64Encode(imgResponse.getContent());
+            thumbnailUrl = 'data:image/png;base64,' + base64;
+            cache.put(cacheKey, thumbnailUrl, 86400); // 24 hours
+          }
+        }
       } catch (e) {
         Logger.log('Thumbnail fetch failed for ' + templateKey + ': ' + e);
       }

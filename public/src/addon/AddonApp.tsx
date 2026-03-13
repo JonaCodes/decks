@@ -23,9 +23,8 @@ function LoadingTemplateSkeletons() {
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i} padding='xs' radius='sm' withBorder>
           <Stack gap={6}>
-            <Skeleton height={128} radius={0} />
-            <Skeleton height={14} width='70%' />
-            <Skeleton height={12} width='40%' />
+            <Skeleton height={14} width='40%' radius={'sm'} />
+            <Skeleton height={128} radius={'sm'} />
           </Stack>
         </Card>
       ))}
