@@ -43,3 +43,12 @@ function insertTemplateSlide(payload) {
 function discoverTemplates() {
   return SlideOps.discoverTemplates();
 }
+
+/**
+ * Upload an image (base64) and return a URL for use in slide insertion.
+ * Currently tries a data URI — if that doesn't work with the Slides API,
+ * we'll switch to the temp-slide approach.
+ */
+function uploadImage(payload) {
+  return SlideOps.uploadImage(payload);
+}

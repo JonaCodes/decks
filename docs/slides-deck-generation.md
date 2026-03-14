@@ -15,7 +15,9 @@ slides into a user's active presentation.
    thumbnail is fetched server-side via `UrlFetchApp` (bypassing Google CDN's
    cross-origin 429), encoded as a base64 data URL, and cached for 6 hours via
    `CacheService` — so the browser never makes a direct request to Google's CDN.
-3. User picks a template, fills in the fields, and submits.
+3. User picks a template, fills in the fields, and submits. Image fields accept
+   a URL or a clipboard paste (Cmd+V) — see
+   [image-upload-flow.md](/Users/jona/Documents/projects/decks/docs/image-upload-flow.md).
 4. The sidebar sends a `postMessage` via `bridge.ts` → `Sidebar.html` →
    `google.script.run` (Apps Script).
 5. `SlideOps.gs` finds the matching template slide in the template deck (by
@@ -30,15 +32,17 @@ slides into a user's active presentation.
 - [`addon/SlideOps.gs`](/Users/jona/Documents/projects/decks/addon/SlideOps.gs)
   — core slide-insert logic and `discoverTemplates()` (Apps Script)
 - [`addon/SlideHelpers.gs`](/Users/jona/Documents/projects/decks/addon/SlideHelpers.gs)
-  — private helpers used by `SlideOps.gs` (`_parseNoteValue`, `_discoverSlideFields`,
-  `_findTemplateSlide`, `_replaceImagePlaceholder`)
+  — private helpers used by `SlideOps.gs` (`_parseNoteValue`,
+  `_discoverSlideFields`, `_findTemplateSlide`, `_replaceImagePlaceholder`)
 - [`addon/appsscript.json`](/Users/jona/Documents/projects/decks/addon/appsscript.json)
   — declares the Slides Advanced Service (`enabledAdvancedServices`) and the
-  `script.external_request` scope (`UrlFetchApp`) required for thumbnail fetching
+  `script.external_request` scope (`UrlFetchApp`) required for thumbnail
+  fetching
 - [`addon/Sidebar.html`](/Users/jona/Documents/projects/decks/addon/Sidebar.html)
   — iframe wrapper + postMessage bridge
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
-  — React sidebar UI (`AddonApp`, `TemplateForm`, `ChatBox`, `bridge.ts`)
+  — React sidebar UI (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`,
+  `bridge.ts`)
 - [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
   — `POST /api/plan-slides` (stub for future LLM slide planning from the chat
   box; `GET /api/templates` removed — templates are now discovered via Apps

@@ -12,6 +12,7 @@ import {
 import { IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react';
 import type { TemplateDefinition } from '@shared/templates/types.js';
 import { sendInsertSlide } from './bridge.js';
+import ImageField from './ImageField.js';
 import TemplateThumbnail from './TemplateThumbnail.js';
 
 interface TemplateFormProps {
@@ -84,22 +85,29 @@ export function TemplateForm({
         ) : (
           template.fields
             .sort((a, b) => a.name.localeCompare(b.name))
-            .map((field) => (
-              <TextInput
-                autoFocus={field.name === template.fields[0].name}
-                key={field.name}
-                label={field.name}
-                placeholder={
-                  field.type === 'image' ? 'Image URL' : `Enter ${field.name}`
-                }
-                required={field.required}
-                value={values[field.name] ?? ''}
-                onChange={(e) =>
-                  handleChange(field.name, e.currentTarget.value)
-                }
-                size='xs'
-              />
-            ))
+            .map((field) =>
+              field.type === 'image' ? (
+                <ImageField
+                  key={field.name}
+                  field={field}
+                  value={values[field.name] ?? ''}
+                  onChange={(value) => handleChange(field.name, value)}
+                />
+              ) : (
+                <TextInput
+                  autoFocus={field.name === template.fields[0].name}
+                  key={field.name}
+                  label={field.name}
+                  placeholder={`Enter ${field.name}`}
+                  required={field.required}
+                  value={values[field.name] ?? ''}
+                  onChange={(e) =>
+                    handleChange(field.name, e.currentTarget.value)
+                  }
+                  size='xs'
+                />
+              )
+            )
         )}
 
         {/* Feedback */}

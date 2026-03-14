@@ -68,6 +68,23 @@
             .testBridge();
         }
 
+        if (msg.type === 'uploadImage') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'uploadImageResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'uploadImageResult', id: msg.id, error: String(err) },
+                '*'
+              );
+            })
+            .uploadImage(msg.payload);
+        }
+
         if (msg.type === 'insertSlide') {
           google.script.run
             .withSuccessHandler(function (result) {

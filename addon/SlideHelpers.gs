@@ -65,9 +65,7 @@ function _discoverSlideFields(slide) {
         // Match {{FIELD}} (required)
         var reqMatches = text.match(/\{\{([A-Z0-9_]+)\}\}/gi) || [];
         for (var ri = 0; ri < reqMatches.length; ri++) {
-          var reqName = reqMatches[ri]
-            .replace(/\{\{|\}\}/g, '')
-            .toLowerCase();
+          var reqName = reqMatches[ri].replace(/\{\{|\}\}/g, '').toLowerCase();
           if (!seen[reqName]) {
             seen[reqName] = true;
             fields.push({ name: reqName, type: 'text', required: true });
@@ -109,29 +107,25 @@ function _replaceImagePlaceholder(slide, fieldName, imageUrl) {
   var elements = slide.getPageElements();
   for (var i = 0; i < elements.length; i++) {
     var el = elements[i];
+    var matched = false;
     try {
-      if (el.getDescription && el.getDescription() === slotTag) {
-        if (el.getPageElementType() !== SlidesApp.PageElementType.IMAGE) {
-          throw new Error(
-            'Placeholder "' +
-              slotTag +
-              '" must be an image element to preserve styling'
-          );
-        }
-
-        el.asImage().replace(imageUrl, true);
-        return;
-      }
+      matched = el.getDescription && el.getDescription() === slotTag;
     } catch (e) {
-      if (
-        String(e).indexOf(
-          'Placeholder "' + slotTag + '" must be an image element'
-        ) !== -1
-      ) {
-        throw e;
-      }
-      // Some element types do not support descriptions or image replacement; skip.
+      // Some element types do not support getDescription; skip.
+      continue;
     }
+    if (!matched) continue;
+
+    // Element matched — any error from here is a real failure, not a skip.
+    if (el.getPageElementType() !== SlidesApp.PageElementType.IMAGE) {
+      throw new Error(
+        'Placeholder "' +
+          slotTag +
+          '" must be an image element to preserve styling'
+      );
+    }
+    el.asImage().replace(imageUrl, true);
+    return;
   }
 
   throw new Error('Image placeholder not found for field: ' + fieldName);

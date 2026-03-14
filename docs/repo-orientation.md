@@ -11,7 +11,7 @@ live.
   `Sidebar.html`, clasp config)
 - `public/`: Vite app
 - `public/src/addon/`: React sidebar UI served inside the add-on iframe
-  (`AddonApp`, `TemplateForm`, `ChatBox`, `bridge.ts`)
+  (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`, `bridge.ts`)
 - `server/`: Express server, integrations, scripts
 - `server/routes/`: Express route handlers (`templates.ts` —
   `POST /api/plan-slides`)
@@ -34,3 +34,5 @@ live.
 
 - For Slides work:
   [slides-deck-generation.md](/Users/jona/Documents/projects/decks/docs/slides-deck-generation.md)
+- For clipboard image paste:
+  [image-upload-flow.md](/Users/jona/Documents/projects/decks/docs/image-upload-flow.md)

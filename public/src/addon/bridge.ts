@@ -29,6 +29,17 @@ window.addEventListener('message', (event) => {
     }
   }
 
+  if (data.type === 'uploadImageResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) {
+      p.reject(new Error(data.error));
+    } else {
+      p.resolve(data.result);
+    }
+  }
+
   if (data.type === 'insertSlideResult') {
     const p = pending.get(data.id);
     if (!p) return;
@@ -71,6 +82,20 @@ export function sendDiscoverTemplates(): Promise<TemplateDefinition[]> {
   return new Promise<TemplateDefinition[]>((resolve, reject) => {
     pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
     window.parent.postMessage({ type: 'discoverTemplates', id }, '*');
+  });
+}
+
+export function sendUploadImage(
+  base64Data: string,
+  mimeType: string
+): Promise<{ url: string }> {
+  const id = generateId();
+  return new Promise<{ url: string }>((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage(
+      { type: 'uploadImage', id, payload: { base64Data, mimeType } },
+      '*'
+    );
   });
 }
 

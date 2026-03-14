@@ -150,8 +150,49 @@ var SlideOps = (function () {
     return { slideObjectId: inserted.getObjectId() };
   }
 
+  /**
+   * Upload an image by embedding it in a temp slide and reading back the
+   * Google-hosted content URL. The temp slide is deleted immediately after.
+   * @param {Object} payload - { base64Data: string, mimeType: string }
+   * @returns {{ url: string }}
+   */
+  function uploadImage(payload) {
+    var base64Data = payload.base64Data;
+    var mimeType = payload.mimeType || 'image/png';
+
+    if (!base64Data) {
+      throw new Error('No image data provided');
+    }
+    // ~5MB limit: base64 is ~4/3x the raw size, so 5MB raw ≈ 6.7MB base64
+    if (base64Data.length > 7 * 1024 * 1024) {
+      throw new Error('Image too large (max 5MB)');
+    }
+
+    var blob = Utilities.newBlob(
+      Utilities.base64Decode(base64Data),
+      mimeType,
+      'paste.png'
+    );
+
+    var pres = SlidesApp.getActivePresentation();
+    var tempSlide = pres.appendSlide();
+    var img = tempSlide.insertImage(blob);
+
+    // getContentUrl() is synchronous within SlidesApp — no REST API needed
+    var contentUrl = img.getContentUrl();
+
+    // Clean up temp slide before returning
+    tempSlide.remove();
+
+    if (!contentUrl) {
+      throw new Error('Failed to retrieve image content URL');
+    }
+    return { url: contentUrl };
+  }
+
   return {
     insertTemplateSlide: insertTemplateSlide,
     discoverTemplates: discoverTemplates,
+    uploadImage: uploadImage,
   };
 })();
