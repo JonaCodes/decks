@@ -22,6 +22,7 @@ function _parseNoteValue(notes, key) {
  * - Text elements containing {{FIELD}} → required text field
  * - Text elements containing {{?FIELD}} → optional text field
  * - Page elements with description "slot:field_name" → required image field
+ * - Page elements with description "slot:?field_name" → optional image field
  * Returns deduplicated array of { name, type, required }.
  */
 function _discoverSlideFields(slide) {
@@ -36,10 +37,11 @@ function _discoverSlideFields(slide) {
     try {
       var desc = el.getDescription ? el.getDescription() : '';
       if (desc && desc.indexOf('slot:') === 0) {
-        var imgField = desc.slice('slot:'.length).trim();
+        var optional = desc.charAt(5) === '?';
+        var imgField = desc.slice(optional ? 6 : 5).trim();
         if (imgField && !seen[imgField]) {
           seen[imgField] = true;
-          fields.push({ name: imgField, type: 'image', required: true });
+          fields.push({ name: imgField, type: 'image', required: !optional });
         }
       }
     } catch (e) {
@@ -99,8 +101,28 @@ function _findTemplateSlide(presentation, templateKey) {
 }
 
 /**
- * Find an image on the slide with alt-text "slot:field_name" and replace it
- * in place so the existing element styling is preserved.
+ * Find an image placeholder on the slide with alt-text "slot:field_name" or
+ * "slot:?field_name" and remove it. Used for optional image fields left empty.
+ * Silently does nothing if the element is not found.
+ */
+function _removeImagePlaceholder(slide, fieldName) {
+  var elements = slide.getPageElements();
+  for (var i = 0; i < elements.length; i++) {
+    var el = elements[i];
+    try {
+      var d = el.getDescription ? el.getDescription() : '';
+      if (d === 'slot:' + fieldName || d === 'slot:?' + fieldName) {
+        el.remove();
+        return;
+      }
+    } catch (e) { /* skip */ }
+  }
+}
+
+/**
+ * Find an image on the slide with alt-text "slot:field_name" or
+ * "slot:?field_name" and replace it in place so existing element styling is
+ * preserved.
  */
 function _replaceImagePlaceholder(slide, fieldName, imageUrl) {
   var slotTag = 'slot:' + fieldName;
@@ -109,7 +131,8 @@ function _replaceImagePlaceholder(slide, fieldName, imageUrl) {
     var el = elements[i];
     var matched = false;
     try {
-      matched = el.getDescription && el.getDescription() === slotTag;
+      var d = el.getDescription ? el.getDescription() : '';
+      matched = d === slotTag || d === 'slot:?' + fieldName;
     } catch (e) {
       // Some element types do not support getDescription; skip.
       continue;

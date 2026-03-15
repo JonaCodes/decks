@@ -143,8 +143,11 @@ var SlideOps = (function () {
     for (var m = 0; m < imageFields.length; m++) {
       var imgFieldName = imageFields[m].name;
       var imgUrl = values[imgFieldName];
-      if (!imgUrl) continue;
-      _replaceImagePlaceholder(inserted, imgFieldName, imgUrl);
+      if (imgUrl) {
+        _replaceImagePlaceholder(inserted, imgFieldName, imgUrl);
+      } else if (!imageFields[m].required) {
+        _removeImagePlaceholder(inserted, imgFieldName);
+      }
     }
 
     return { slideObjectId: inserted.getObjectId() };
