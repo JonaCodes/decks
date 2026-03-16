@@ -1,0 +1,345 @@
+[
+  {
+    "name": "First Slide",
+    "description": "This is the first slide of the presentation. It only appears once at the beginning. Should have a clear title, and clever subtitle",
+    "fields": [
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "subtitle",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "templateKey": "presentation_start"
+  },
+  {
+    "name": "Word Cloud",
+    "description": "Use this slide sparingly if at all. It can be used to show things like buzzwords, loosely associated ideas. Usually used at the beginning of a new section to show “all the possible things”, and later we’ll break it down.",
+    "fields": [
+      {
+        "name": "main_word",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cloud_word_1",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cloud_word_5",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cloud_word_3",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cloud_word_6",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cloud_word_2",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cloud_word_4",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "templateKey": "word_cloud"
+  },
+  {
+    "name": "Six Cards",
+    "description": "Use this slide to show up to six cards of non-sequential items. This could be “six tips” or “three pillars” or “five things to avoid”, etc. The title and subtitle should be clear, factual, to the point, short. If they need a bit more detail, that should go in the card’s explanation",
+    "fields": [
+      {
+        "name": "card_3_title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "card_3_subtext",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "card_2_title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "card_2_subtext",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "card_5_title",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_5_subtext",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_4_title",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_4_subtext",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_6_title",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_6_subtext",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_1_title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "card_1_subtext",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "card_1_explanation",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_2_explanation",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_3_explanation",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_4_explanation",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_5_explanation",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "card_6_explanation",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "templateKey": "6_cards"
+  },
+  {
+    "name": "New Section",
+    "description": "Use this as a clear “break” that we’re moving on to the next “thing”",
+    "fields": [
+      {
+        "name": "main_title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "subtitle",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "big_img_right",
+        "type": "image",
+        "required": false
+      },
+      {
+        "name": "small_img_by_title_1",
+        "type": "image",
+        "required": false
+      },
+      {
+        "name": "small_img_by_title_2",
+        "type": "image",
+        "required": false
+      },
+      {
+        "name": "small_img_by_title_3",
+        "type": "image",
+        "required": false
+      }
+    ],
+    "templateKey": "new_section_intro"
+  },
+  {
+    "name": "Quick Bridge",
+    "description": "Use this slide as a small “bridge” within a section. Could be used for example if we showed something at a high level, and now want to dive into it. For example the previous slide might have shown an example of a language model, and this slide might say “So what is an language model?”",
+    "fields": [
+      {
+        "name": "text",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "templateKey": "quick_bridge"
+  },
+  {
+    "name": "Simple Message",
+    "description": "A pair of lines, one on top of the other. Use this to either: (1) explain an idea briefly, and provide a quick example, (2) ask a pair of questions to make the viewer think, (3) make a statement, with a clause/clarifier underneath, or (4) break an important takeaway into two parts, where the second part is emphasized",
+    "fields": [
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "text1",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "text2",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "templateKey": "simple_message"
+  },
+  {
+    "name": "Image and list",
+    "description": "Use this slide to display a visual and a list explaining or breaking down the visual. This could be a code snippet (image) and explanation of the main parts, or a config file (image), or even a screenshot of a platform",
+    "fields": [
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "point_4",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "point_1",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "point_2",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "point_3",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "header",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "img",
+        "type": "image",
+        "required": true
+      }
+    ],
+    "templateKey": "image_and_list"
+  },
+  {
+    "name": "Image and highlights",
+    "description": "Use this slide to display a visual with specific parts of it highlighted. For example this could be used to show a screenshot of a complex platform, and then highlights of what part to focus the viewers on.",
+    "fields": [
+      {
+        "name": "img",
+        "type": "image",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "subheader",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "header",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "templateKey": "image_and_highlights"
+  },
+  {
+    "name": "Image and detailed highlight",
+    "description": "Use this slide to display a visual with a specific part of it highlighted. This could be a code snippet (image) and explanation of a specific parts, or a config file (image), or even a screenshot of a platform/tool, and then highlight what part to focus the viewers on. You can also use a series of these slides in a row to highlight the different parts of the screenshot/snippet/config/etc to ‘break down’ something complex or with multiple parts. This slide has translucent",
+    "fields": [
+      {
+        "name": "img",
+        "type": "image",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "subheader",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "header",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "context",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "templateKey": "image_and_detailed_highlight"
+  }
+]

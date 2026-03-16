@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  ActionIcon,
   Box,
   Card,
   ScrollArea,
@@ -7,13 +8,17 @@ import {
   Stack,
   Text,
   TextInput,
+  Tooltip,
 } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { IconRefresh, IconSearch } from '@tabler/icons-react';
+import redaxios from 'redaxios';
 import type { TemplateDefinition } from '@shared/templates/types.js';
 import { sendDiscoverTemplates } from './bridge.js';
 import { TemplateList } from './TemplateList.js';
 import { TemplateForm } from './TemplateForm.js';
 import { ChatBox } from './ChatBox.js';
+
+const API_BASE = (import.meta.env.VITE_BACKEND_URL ?? '') + '/api';
 
 type View = 'browse' | 'form';
 
@@ -40,6 +45,24 @@ export function AddonApp() {
   const [search, setSearch] = useState('');
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  async function handleSyncTemplates() {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      const data = await sendDiscoverTemplates();
+      // Strip thumbnails — they're large base64 strings not needed in the prompt
+      const stripped = data.map(({ thumbnailUrl: _, ...rest }) => rest);
+      await redaxios.post(`${API_BASE}/sync-templates`, {
+        templates: stripped,
+      });
+    } catch {
+      // Sync is a dev convenience — silent fail is fine
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -108,15 +131,28 @@ export function AddonApp() {
         overflow: 'hidden',
       }}
     >
-      {/* Search */}
-      <Box p='xs' style={{ flexShrink: 0 }}>
+      {/* Search + Sync */}
+      <Box p='xs' style={{ flexShrink: 0, display: 'flex', gap: 6 }}>
         <TextInput
           placeholder='Search templates…'
           leftSection={<IconSearch size={14} />}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
           size='xs'
+          style={{ flex: 1 }}
         />
+        <Tooltip label='Sync templates to prompt file' position='bottom'>
+          <ActionIcon
+            onClick={handleSyncTemplates}
+            loading={syncing}
+            variant='subtle'
+            size='md'
+            aria-label='Sync templates'
+            mt={1}
+          >
+            <IconRefresh size={14} />
+          </ActionIcon>
+        </Tooltip>
       </Box>
 
       {/* Template list — scrollable middle section */}
