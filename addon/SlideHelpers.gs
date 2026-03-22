@@ -120,6 +120,20 @@ function _removeImagePlaceholder(slide, fieldName) {
 }
 
 /**
+ * Find a slide in the active presentation by its objectId.
+ * Returns null if not found.
+ */
+function _findSlideById(slideObjectId) {
+  var slides = SlidesApp.getActivePresentation().getSlides();
+  for (var i = 0; i < slides.length; i++) {
+    if (slides[i].getObjectId() === slideObjectId) {
+      return slides[i];
+    }
+  }
+  return null;
+}
+
+/**
  * Find an image on the slide with alt-text "slot:field_name" or
  * "slot:?field_name" and replace it in place so existing element styling is
  * preserved.

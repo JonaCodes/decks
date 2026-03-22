@@ -51,6 +51,38 @@ window.addEventListener('message', (event) => {
     }
   }
 
+  if (data.type === 'getCurrentSlideResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) p.reject(new Error(data.error));
+    else p.resolve(data.result);
+  }
+
+  if (data.type === 'updateSlideImageResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) p.reject(new Error(data.error));
+    else p.resolve(data.result);
+  }
+
+  if (data.type === 'updateSlideTextResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) p.reject(new Error(data.error));
+    else p.resolve(data.result);
+  }
+
+  if (data.type === 'finalizeSlideResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) p.reject(new Error(data.error));
+    else p.resolve(data.result);
+  }
+
   if (data.type === 'testBridgeResult') {
     const p = pending.get('testBridge');
     if (!p) return;
@@ -65,13 +97,18 @@ window.addEventListener('message', (event) => {
 
 export function sendInsertSlide(
   templateKey: string,
-  values: Record<string, string>
+  values: Record<string, string>,
+  appendToEnd?: boolean
 ): Promise<InsertSlideResponse> {
   const id = generateId();
   return new Promise<InsertSlideResponse>((resolve, reject) => {
     pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
     window.parent.postMessage(
-      { type: 'insertSlide', id, payload: { templateKey, values } },
+      {
+        type: 'insertSlide',
+        id,
+        payload: { templateKey, values, appendToEnd: appendToEnd ?? false },
+      },
       '*'
     );
   });
@@ -106,5 +143,73 @@ export function sendTestBridge(): Promise<{ ok: boolean }> {
       reject,
     });
     window.parent.postMessage({ type: 'testBridge' }, '*');
+  });
+}
+
+export function sendGetCurrentSlide(): Promise<{
+  slideObjectId: string | null;
+}> {
+  const id = generateId();
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage({ type: 'getCurrentSlide', id }, '*');
+  });
+}
+
+export function sendUpdateSlideImage(
+  slideObjectId: string,
+  fieldName: string,
+  imageUrl: string
+): Promise<void> {
+  const id = generateId();
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage(
+      {
+        type: 'updateSlideImage',
+        id,
+        payload: { slideObjectId, fieldName, imageUrl },
+      },
+      '*'
+    );
+  });
+}
+
+export function sendFinalizeSlide(
+  slideObjectId: string,
+  unfilledTextFields: string[],
+  unfilledImageFields: string[]
+): Promise<void> {
+  const id = generateId();
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage(
+      {
+        type: 'finalizeSlide',
+        id,
+        payload: { slideObjectId, unfilledTextFields, unfilledImageFields },
+      },
+      '*'
+    );
+  });
+}
+
+export function sendUpdateSlideText(
+  slideObjectId: string,
+  fieldName: string,
+  oldValue: string,
+  newValue: string
+): Promise<void> {
+  const id = generateId();
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage(
+      {
+        type: 'updateSlideText',
+        id,
+        payload: { slideObjectId, fieldName, oldValue, newValue },
+      },
+      '*'
+    );
   });
 }

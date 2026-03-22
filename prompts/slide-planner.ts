@@ -50,33 +50,27 @@ export function buildSlidePrompt(): string {
 **Note:** The points below are guidelines, not strict rules to be followed blindly for each slide/presentation. You can mix and match as you see fit, even deviate if it makes sense for the topic.
 
 ### Layout
-- Prioritize white space. Keep text minimal — short, punchy sentences, never paragraphs.
-- Every conceptual slide should feature a relevant image, icon, or diagram. Avoid text-only slides unless they are a single "punchline" statement.
-- Use color to emphasize keywords within sentences (e.g. pink for the subject, blue for the action, always bold).
+- Prioritize white space. Keep text minimal — short sentences, never paragraphs.
+- Every conceptual slide should feature a relevant image, icon, or diagram. Text-only slides are allowed as transitions/to underline a point.
 
-### Narrative Structure
+### Narrative Structure Options
 - **Problem-first:** Start by showing a "bad" example or common failure mode before the correct approach. Follow with a "What went wrong?" critique to build intuition.
 - **Iterative deepening:** Show an attempt, critique it, refine, show the improved result. This applies to prompt engineering, code, architecture — anything with iterations.
-- **Incremental build:** Never present a complex system diagram in one go. Build it component by component across sequential slides, managing cognitive load.
+- **Incremental build:** Build complex system diagrams component by component across sequential slides, managing cognitive load.
 - **Contrastive definition:** When introducing new technology, define it by contrasting with what students already know, showing code-level differences.
 
 ### Engagement
-- Intermingle lecture slides with "Thinking time" or "Discuss" prompts for peer reflection before moving on.
-- Every conceptual section must conclude with a "Practice time" or "Now you" slide with clear, step-by-step tasks.
-- Before hands-on tasks, show a "Target" slide with a screenshot or visual of the expected final output.
 - Use real screenshots (forums, terminals, UIs) with annotations as evidence for conceptual claims.
+- Where relevant, add a "Practice" slide so the participants can practice the concept.
 
 ### Sequential Storytelling
 - When explaining processes (API flows, agent loops, setup steps), break them across multiple slides. Each slide reveals one new part while keeping previous parts visible (possibly faded).
 - For UI or tool walkthroughs, use a long sequence of full-screen screenshots where each slide represents one small step ("micro-step" walkthrough).
+- Generally speaking, sequential slides should share the same title to enforce the idea of a single narrative and continuity.
 
 ## Available Templates
 
 ${formatTemplates(templates)}
-
-## The "custom" Slide Type
-
-Not all slides will match a template — diagrams, architecture visuals, annotated screenshots, code walkthroughs, etc. For these, use \`"type": "custom"\`. These become blank slides with instructions for the presenter to create the visual manually.
 
 ## Output Format
 
@@ -89,38 +83,38 @@ Respond with ONLY a JSON array. Each element is one of:
   "template_key": "<key from Available Templates>",
   "fields": {
     "<field_name>": "<value>",
-    ...
+    "<image_field_name>": ""
+  },
+  "image_suggestions": {
+    "<image_field_name>": {
+      "description": "What the image should show — be specific enough to find or create it",
+      "reuse_previous_visual": false
+    }
   }
 }
 \`\`\`
 
 - All required fields must be provided.
 - Optional fields can be omitted or set to \`""\`.
-- Image fields: set to \`""\` (the presenter will fill these manually).
-
-### Custom slide
-\`\`\`json
-{
-  "type": "custom",
-  "title": "<short slide title>",
-  "description": "<what this slide should show visually>",
-  "notes": "<optional: presenter notes, content details, or build instructions>"
-}
-\`\`\`
-
-Use custom slides for:
-- Architecture diagrams, data flow visuals, system overviews
-- Annotated screenshots or code walkthroughs
-- Side-by-side comparisons that don't fit a template
-- Any visual that requires manual creation
+- Image fields: always set to \`""\` — the presenter will fill these manually.
+- For every image field, include an \`image_suggestions\` entry describing what to use.
+- Set \`reuse_previous_visual: true\` when the same screenshot or diagram from a previous slide applies.
+- Omit \`image_suggestions\` entirely if the slide has no image fields.
 
 ## Rules
 
 1. Avoid having more than two short sentences on a punchline/key-insight slide unless it makes sense.
 2. Always follow a deep-dive or demo sequence with a "bottom line" summary slide.
-3. Group practice exercises after conceptual sections — don't stack all exercises at the end.
+3. Only stack all exercises at the end if it makes sense for the topic.
 4. Section headers should break the deck into logical units (one per major concept).
-5. Prefer the iterative critique pattern (bad → what went wrong → better).
-6. When showing a multi-step process, use one slide per step — do not cram steps together.
+5. When showing a multi-step process, use one slide per step — do not cram steps together.
+6. Never use any buzzwords. Keep everything grounded and practical
+
+## How to generate the slide plan:
+1. Read the learning objectives/guides from the input
+2. Research up to date information about the topic
+3. Break the presentation down into 10-30 slides
+4. For each slide, spawn a subagent that reads the relevant "template_key.md" from "prompts/template_examples/". These markdown files include examples of each template. The subagent should adapt the content to fit the writing style of these examples.
+5. Return the slide content as a JSON array.
 `;
 }

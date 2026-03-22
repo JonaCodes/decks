@@ -122,6 +122,74 @@
             })
             .discoverTemplates();
         }
+
+        if (msg.type === 'getCurrentSlide') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'getCurrentSlideResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'getCurrentSlideResult', id: msg.id, error: String(err) },
+                '*'
+              );
+            })
+            .getCurrentSlideId();
+        }
+
+        if (msg.type === 'updateSlideImage') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'updateSlideImageResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'updateSlideImageResult', id: msg.id, error: String(err) },
+                '*'
+              );
+            })
+            .updateSlideImage(msg.payload);
+        }
+
+        if (msg.type === 'updateSlideText') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'updateSlideTextResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'updateSlideTextResult', id: msg.id, error: String(err) },
+                '*'
+              );
+            })
+            .updateSlideText(msg.payload);
+        }
+
+        if (msg.type === 'finalizeSlide') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                { type: 'finalizeSlideResult', id: msg.id, result: result },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                { type: 'finalizeSlideResult', id: msg.id, error: String(err) },
+                '*'
+              );
+            })
+            .finalizeSlide(msg.payload);
+        }
       });
     </script>
   </body>

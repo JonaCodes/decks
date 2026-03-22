@@ -1,55 +1,53 @@
 import { useState } from 'react';
-import {
-  ActionIcon,
-  Alert,
-  Box,
-  Paper,
-  Stack,
-  Text,
-  Textarea,
-} from '@mantine/core';
+import { ActionIcon, Alert, Box, Stack, Text, Textarea } from '@mantine/core';
 import { IconAlertCircle, IconSend } from '@tabler/icons-react';
-import redaxios from 'redaxios';
+import type { PlannedSlide } from '@shared/templates/types.js';
 
-const API_BASE = (import.meta.env.VITE_BACKEND_URL ?? '') + '/api';
-
-interface PlanResponse {
-  message?: string;
-  plan?: string;
-  [key: string]: unknown;
+interface ChatBoxProps {
+  onPlanReady: (slides: PlannedSlide[]) => void;
 }
 
-export function ChatBox() {
+function parsePlan(text: string): PlannedSlide[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error('Invalid JSON — could not parse the pasted plan.');
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error('Expected a JSON array of slides.');
+  }
+  if (parsed.length === 0) {
+    throw new Error('Plan contains no slides.');
+  }
+  for (const item of parsed) {
+    if (!item || typeof item !== 'object' || !('type' in item)) {
+      throw new Error('Each slide must have a "type" field.');
+    }
+    if (item.type !== 'template' && item.type !== 'custom') {
+      throw new Error(
+        `Unknown slide type: "${item.type}". Expected "template" or "custom".`
+      );
+    }
+  }
+  return parsed as PlannedSlide[];
+}
+
+export function ChatBox({ onPlanReady }: ChatBoxProps) {
   const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSend() {
+  function handleSend() {
     const text = prompt.trim();
-    if (!text || loading) return;
+    if (!text) return;
 
-    setLoading(true);
     setError(null);
-    setResponse(null);
-
     try {
-      const res = await redaxios.post<PlanResponse>(`${API_BASE}/plan-slides`, {
-        prompt: text,
-      });
-      const data = res.data;
-      const msg =
-        typeof data.message === 'string'
-          ? data.message
-          : typeof data.plan === 'string'
-            ? data.plan
-            : JSON.stringify(data, null, 2);
-      setResponse(msg);
+      const slides = parsePlan(text);
+      onPlanReady(slides);
       setPrompt('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Request failed.');
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'Failed to parse plan.');
     }
   }
 
@@ -63,17 +61,6 @@ export function ChatBox() {
   return (
     <Box p='xs' style={{ borderTop: '1px solid var(--mantine-color-dark-4)' }}>
       <Stack gap='xs'>
-        {response && (
-          <Paper p='xs' radius='sm' withBorder>
-            <Text
-              size='xs'
-              style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-            >
-              {response}
-            </Text>
-          </Paper>
-        )}
-
         {error && (
           <Alert
             icon={<IconAlertCircle size={14} />}
@@ -87,7 +74,7 @@ export function ChatBox() {
 
         <Box style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
           <Textarea
-            placeholder='Describe the slides you need…'
+            placeholder='Paste slide plan JSON…'
             value={prompt}
             onChange={(e) => setPrompt(e.currentTarget.value)}
             onKeyDown={handleKeyDown}
@@ -96,15 +83,13 @@ export function ChatBox() {
             maxRows={4}
             size='xs'
             style={{ flex: 1 }}
-            disabled={loading}
           />
           <ActionIcon
             onClick={handleSend}
-            loading={loading}
             disabled={!prompt.trim()}
             variant='filled'
             size='md'
-            aria-label='Send'
+            aria-label='Load plan'
             mb={1}
           >
             <IconSend size={14} />

@@ -52,3 +52,19 @@ function discoverTemplates() {
 function uploadImage(payload) {
   return SlideOps.uploadImage(payload);
 }
+
+function getCurrentSlideId() {
+  return SlideOps.getCurrentSlideId();
+}
+
+function updateSlideImage(payload) {
+  return SlideOps.updateSlideImage(payload);
+}
+
+function updateSlideText(payload) {
+  return SlideOps.updateSlideText(payload);
+}
+
+function finalizeSlide(payload) {
+  return SlideOps.finalizeSlide(payload);
+}

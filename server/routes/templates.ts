@@ -3,6 +3,7 @@ import { writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import type { Request, Response } from 'express';
+import { buildSlidePrompt } from '../../prompts/slide-planner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -23,7 +24,8 @@ router.post('/api/sync-templates', (req: Request, res: Response) => {
   const outPath = join(__dirname, '..', '..', 'prompts', 'templates.json');
   writeFileSync(outPath, JSON.stringify(templates, null, 2) + '\n');
 
-  return res.json({ ok: true, count: templates.length });
+  const prompt = buildSlidePrompt();
+  return res.json({ ok: true, count: templates.length, prompt });
 });
 
 export default router;

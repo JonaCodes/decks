@@ -7,6 +7,8 @@ slides into a user's active presentation.
 
 ## What the flow does (add-on)
 
+### Single-slide insert
+
 1. User opens the "Decks" sidebar via the add-on menu in Google Slides.
 2. The React sidebar UI (`public/src/addon/`) fetches available templates via
    `bridge.ts` → `Sidebar.html` → `google.script.run`, which calls
@@ -21,9 +23,25 @@ slides into a user's active presentation.
 4. The sidebar sends a `postMessage` via `bridge.ts` → `Sidebar.html` →
    `google.script.run` (Apps Script).
 5. `SlideOps.gs` finds the matching template slide in the template deck (by
-   `template_key` in speaker notes), copies it into the active presentation,
-   replaces `{{FIELD}}` text placeholders, and swaps `slot:field` image
-   placeholders.
+   `template_key` in speaker notes), copies it into the active presentation
+   after the currently selected slide, replaces `{{FIELD}}` text placeholders,
+   and swaps `slot:field` image placeholders.
+
+### Batch insert from a deck plan
+
+1. Use `prompts/slide-planner.ts` to generate a system prompt, then feed it to
+   an external LLM with a topic/objectives. The LLM returns a JSON array of
+   planned slides (`type: "template"`), each with `fields` and optional
+   `image_suggestions`.
+2. Paste the JSON into the ChatBox at the bottom of the sidebar.
+3. All slides insert immediately at the end of the presentation
+   (`appendToEnd: true`), one after another with no artificial delay.
+   Placeholders (text and image) are preserved during insertion for later
+   editing.
+4. The add-on enters **edit mode**: it polls the current slide and shows
+   editable fields for whichever slide the user is viewing. Image changes
+   propagate to later slides marked `reuse_previous_visual`. When the user
+   clicks "Done", remaining placeholders are cleaned up.
 
 ## Main code
 
@@ -33,7 +51,8 @@ slides into a user's active presentation.
   — core slide-insert logic and `discoverTemplates()` (Apps Script)
 - [`addon/SlideHelpers.gs`](/Users/jona/Documents/projects/decks/addon/SlideHelpers.gs)
   — private helpers used by `SlideOps.gs` (`_parseNoteValue`,
-  `_discoverSlideFields`, `_findTemplateSlide`, `_replaceImagePlaceholder`)
+  `_discoverSlideFields`, `_findTemplateSlide`, `_replaceImagePlaceholder`,
+  `_findSlideById`, `_removeImagePlaceholder`)
 - [`addon/appsscript.json`](/Users/jona/Documents/projects/decks/addon/appsscript.json)
   — declares the Slides Advanced Service (`enabledAdvancedServices`) and the
   `script.external_request` scope (`UrlFetchApp`) required for thumbnail
@@ -42,13 +61,18 @@ slides into a user's active presentation.
   — iframe wrapper + postMessage bridge
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
   — React sidebar UI (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`,
-  `bridge.ts`)
+  `EditView`, `BrowseView`, `InsertProgress`, `bridge.ts`)
 - [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
-  — `POST /api/plan-slides` (stub for future LLM slide planning from the chat
-  box; `GET /api/templates` removed — templates are now discovered via Apps
-  Script)
+  — `POST /api/sync-templates` (writes discovered templates to
+  `prompts/templates.json` for use in the planner prompt)
 - [`shared/templates/types.ts`](/Users/jona/Documents/projects/decks/shared/templates/types.ts)
-  — canonical shared types used by both server and frontend
+  — canonical shared types (`TemplateDefinition`, `PlannedSlide`, `SlideRecord`,
+  `ImageSuggestion`, etc.)
+- [`prompts/slide-planner.ts`](/Users/jona/Documents/projects/decks/prompts/slide-planner.ts)
+  — generates the system prompt for the external LLM slide planner; reads
+  `prompts/templates.json` and references `prompts/template_examples/*.md`
+- [`prompts/template_examples/`](/Users/jona/Documents/projects/decks/prompts/template_examples/)
+  — per-template style examples used by the planner's subagents
 
 ## Deployment
 
@@ -90,7 +114,5 @@ The add-on runs inside Google Slides as the authenticated user
 
 ## Known limits
 
-- `POST /api/plan-slides` is a stub — LLM-based slide planning from the chat box
-  is not yet implemented.
 - Repo-wide TypeScript may have unrelated errors outside the active flow;
   validate touched files directly if needed.

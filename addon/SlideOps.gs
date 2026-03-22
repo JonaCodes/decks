@@ -94,49 +94,55 @@ var SlideOps = (function () {
       throw new Error('Template slide not found for key: ' + templateKey);
     }
 
-    // Validate required fields by discovering them from the template slide
+    // Validate required fields by discovering them from the template slide.
+    // Image fields are exempt: their placeholders stay in place for post-insert editing.
     var fields = _discoverSlideFields(templateSlide);
     for (var i = 0; i < fields.length; i++) {
       var field = fields[i];
-      if (field.required && !values[field.name]) {
+      if (field.required && field.type !== 'image' && !values[field.name]) {
         throw new Error('Missing required field: ' + field.name);
       }
     }
 
     // Determine insert position in the active presentation
     var activePresentation = SlidesApp.getActivePresentation();
-    var selection = activePresentation.getSelection();
     var insertIndex = activePresentation.getSlides().length; // default: append
 
-    try {
-      var currentPage = selection.getCurrentPage();
-      var slides = activePresentation.getSlides();
-      for (var j = 0; j < slides.length; j++) {
-        if (slides[j].getObjectId() === currentPage.getObjectId()) {
-          insertIndex = j + 1;
-          break;
+    if (!payload.appendToEnd) {
+      var selection = activePresentation.getSelection();
+      try {
+        var currentPage = selection.getCurrentPage();
+        var slides = activePresentation.getSlides();
+        for (var j = 0; j < slides.length; j++) {
+          if (slides[j].getObjectId() === currentPage.getObjectId()) {
+            insertIndex = j + 1;
+            break;
+          }
         }
+      } catch (e) {
+        // No selection — append to end
       }
-    } catch (e) {
-      // No selection — append to end
     }
 
     // Copy template slide into active presentation
     var inserted = activePresentation.insertSlide(insertIndex, templateSlide);
 
     // Replace text placeholders: {{FIELD_NAME_UPPERCASE}} or {{?FIELD_NAME_UPPERCASE}}
+    // Only replace when a value is provided — leave placeholder text intact for post-insert editing.
     var textFields = fields.filter(function (f) {
       return f.type === 'text';
     });
     for (var k = 0; k < textFields.length; k++) {
       var fieldName = textFields[k].name;
-      var val = values[fieldName] || '';
-      // Replace both required {{FIELD}} and optional {{?FIELD}} variants
-      inserted.replaceAllText('{{' + fieldName.toUpperCase() + '}}', val);
-      inserted.replaceAllText('{{?' + fieldName.toUpperCase() + '}}', val);
+      var val = values[fieldName];
+      if (val) {
+        inserted.replaceAllText('{{' + fieldName.toUpperCase() + '}}', val);
+        inserted.replaceAllText('{{?' + fieldName.toUpperCase() + '}}', val);
+      }
     }
 
     // Replace image placeholders: shapes/images with alt-text "slot:field_name"
+    // Only replace when a URL is provided — leave placeholder image in place for post-insert editing.
     var imageFields = fields.filter(function (f) {
       return f.type === 'image';
     });
@@ -145,8 +151,6 @@ var SlideOps = (function () {
       var imgUrl = values[imgFieldName];
       if (imgUrl) {
         _replaceImagePlaceholder(inserted, imgFieldName, imgUrl);
-      } else if (!imageFields[m].required) {
-        _removeImagePlaceholder(inserted, imgFieldName);
       }
     }
 
@@ -193,9 +197,56 @@ var SlideOps = (function () {
     return { url: contentUrl };
   }
 
+  function getCurrentSlideId() {
+    try {
+      var page = SlidesApp.getActivePresentation().getSelection().getCurrentPage();
+      return { slideObjectId: page ? page.getObjectId() : null };
+    } catch (e) {
+      return { slideObjectId: null };
+    }
+  }
+
+  function updateSlideImage(payload) {
+    var slide = _findSlideById(payload.slideObjectId);
+    if (!slide) throw new Error('Slide not found: ' + payload.slideObjectId);
+    _replaceImagePlaceholder(slide, payload.fieldName, payload.imageUrl);
+  }
+
+  function updateSlideText(payload) {
+    var slide = _findSlideById(payload.slideObjectId);
+    if (!slide) throw new Error('Slide not found: ' + payload.slideObjectId);
+    if (payload.oldValue) {
+      slide.replaceAllText(payload.oldValue, payload.newValue);
+    } else {
+      // Field was never filled — placeholder text is still on the slide
+      var upper = payload.fieldName.toUpperCase();
+      slide.replaceAllText('{{' + upper + '}}', payload.newValue);
+      slide.replaceAllText('{{?' + upper + '}}', payload.newValue);
+    }
+  }
+
+  function finalizeSlide(payload) {
+    var slide = _findSlideById(payload.slideObjectId);
+    if (!slide) return;
+    var unfilledText = payload.unfilledTextFields || [];
+    var unfilledImages = payload.unfilledImageFields || [];
+    for (var i = 0; i < unfilledText.length; i++) {
+      var upper = unfilledText[i].toUpperCase();
+      slide.replaceAllText('{{' + upper + '}}', '');
+      slide.replaceAllText('{{?' + upper + '}}', '');
+    }
+    for (var j = 0; j < unfilledImages.length; j++) {
+      _removeImagePlaceholder(slide, unfilledImages[j]);
+    }
+  }
+
   return {
     insertTemplateSlide: insertTemplateSlide,
     discoverTemplates: discoverTemplates,
     uploadImage: uploadImage,
+    getCurrentSlideId: getCurrentSlideId,
+    updateSlideImage: updateSlideImage,
+    updateSlideText: updateSlideText,
+    finalizeSlide: finalizeSlide,
   };
 })();

@@ -1,7 +1,7 @@
 [
   {
     "name": "First Slide",
-    "description": "This is the first slide of the presentation. It only appears once at the beginning. Should have a clear title, and clever subtitle",
+    "description": "Use this slide only as the opening slide of the presentation. It should appear once at the beginning, with a clear title and a short, clever subtitle that frames the topic.",
     "fields": [
       {
         "name": "title",
@@ -18,7 +18,7 @@
   },
   {
     "name": "Word Cloud",
-    "description": "Use this slide sparingly if at all. It can be used to show things like buzzwords, loosely associated ideas. Usually used at the beginning of a new section to show “all the possible things”, and later we’ll break it down.",
+    "description": "Use this slide sparingly to introduce a new section with a central concept and a cloud of related ideas, themes, or buzzwords. It is most useful when you want to show the broader landscape first and then unpack the individual parts in later slides.",
     "fields": [
       {
         "name": "main_word",
@@ -65,7 +65,7 @@
   },
   {
     "name": "Six Cards",
-    "description": "Use this slide to show up to six cards of non-sequential items. This could be “six tips” or “three pillars” or “five things to avoid”, etc. The title and subtitle should be clear, factual, to the point, short. If they need a bit more detail, that should go in the card’s explanation",
+    "description": "Use this slide to present up to six non-sequential items, such as tips, pillars, ideas, categories, mistakes to avoid, etc. It works best when each item is short and distinct rather than part of a step-by-step process. Keep the card title and subtext clear, factual, and concise, and put any extra detail in the card explanation.",
     "fields": [
       {
         "name": "card_3_title",
@@ -167,7 +167,7 @@
   },
   {
     "name": "New Section",
-    "description": "Use this as a clear “break” that we’re moving on to the next “thing”",
+    "description": "Use this slide as a section break before a new major topic. It should clearly signal a transition, with a short title and subtitle introducing what comes next.",
     "fields": [
       {
         "name": "main_title",
@@ -204,7 +204,7 @@
   },
   {
     "name": "Quick Bridge",
-    "description": "Use this slide as a small “bridge” within a section. Could be used for example if we showed something at a high level, and now want to dive into it. For example the previous slide might have shown an example of a language model, and this slide might say “So what is an language model?”",
+    "description": "Use this slide as a short bridge within a section, especially when moving from an overview into a deeper dive. It is best for a simple transition statement or question that prepares the audience for the next concept, explanation, or breakdown.",
     "fields": [
       {
         "name": "text",
@@ -221,7 +221,7 @@
   },
   {
     "name": "Simple Message",
-    "description": "A pair of lines, one on top of the other. Use this to either: (1) explain an idea briefly, and provide a quick example, (2) ask a pair of questions to make the viewer think, (3) make a statement, with a clause/clarifier underneath, or (4) break an important takeaway into two parts, where the second part is emphasized",
+    "description": "Use this slide for a two-line idea where the second line supports, clarifies, contrasts with, or emphasizes the first. It works well for a brief idea plus example, a pair of reflective questions, a statement with a clarifying clause underneath, or a takeaway split into two parts for emphasis.",
     "fields": [
       {
         "name": "title",
@@ -242,77 +242,8 @@
     "templateKey": "simple_message"
   },
   {
-    "name": "Image and list",
-    "description": "Use this slide to display a visual and a list explaining or breaking down the visual. This could be a code snippet (image) and explanation of the main parts, or a config file (image), or even a screenshot of a platform",
-    "fields": [
-      {
-        "name": "title",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "point_4",
-        "type": "text",
-        "required": false
-      },
-      {
-        "name": "point_1",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "point_2",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "point_3",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "header",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "img",
-        "type": "image",
-        "required": true
-      }
-    ],
-    "templateKey": "image_and_list"
-  },
-  {
-    "name": "Image and highlights",
-    "description": "Use this slide to display a visual with specific parts of it highlighted. For example this could be used to show a screenshot of a complex platform, and then highlights of what part to focus the viewers on.",
-    "fields": [
-      {
-        "name": "img",
-        "type": "image",
-        "required": true
-      },
-      {
-        "name": "title",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "subheader",
-        "type": "text",
-        "required": false
-      },
-      {
-        "name": "header",
-        "type": "text",
-        "required": true
-      }
-    ],
-    "templateKey": "image_and_highlights"
-  },
-  {
     "name": "Image and detailed highlight",
-    "description": "Use this slide to display a visual with a specific part of it highlighted. This could be a code snippet (image) and explanation of a specific parts, or a config file (image), or even a screenshot of a platform/tool, and then highlight what part to focus the viewers on. You can also use a series of these slides in a row to highlight the different parts of the screenshot/snippet/config/etc to ‘break down’ something complex or with multiple parts. This slide has translucent",
+    "description": "Use this slide to focus attention on one specific part of a screenshot, code image, or config image. It is especially useful in a sequence of slides that progressively highlight different areas of the same visual to explain a complex interface, snippet, or workflow step by step.",
     "fields": [
       {
         "name": "img",
@@ -338,8 +269,72 @@
         "name": "context",
         "type": "text",
         "required": false
+      },
+      {
+        "name": "details",
+        "type": "text",
+        "required": true
       }
     ],
     "templateKey": "image_and_detailed_highlight"
+  },
+  {
+    "name": "Exercise",
+    "description": "Use this slide to introduce an exercise/project. The guidelines are optional for the participants. Each exercise slide has a link to a github repo already built in.",
+    "fields": [
+      {
+        "name": "guidelines_1",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "sub_guidelines_1",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "guidelines_2",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "sub_guidelines_2",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "guidelines_3",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "sub_guidelines_3",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "templateKey": "exercise"
+  },
+  {
+    "name": "Custom Slide",
+    "description": "Placeholder for custom slides. Make sure to indicate the title as it fits in the sequence. The overview is a brief, few word explanation of the *purpose* of the slide, whereas the suggestion is your suggestion for how to get this objective across with a custom slide.",
+    "fields": [
+      {
+        "name": "overview",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "suggestion",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "templateKey": "custom"
   }
 ]

@@ -23,7 +23,9 @@ Google Slides image placeholder.
    - Returns `{ url: contentUrl }`
 5. The URL populates the image field. On submit it flows into the normal
    `insertTemplateSlide` → `_replaceImagePlaceholder` → `asImage().replace(url)`
-   path unchanged.
+   path. The same uploaded URL can also be used post-insertion via
+   `updateSlideImage` in the edit view to replace images on already-inserted
+   slides.
 
 No Drive files are created. The image is embedded in the presentation at
 insertion time.

@@ -7,12 +7,14 @@ interface ImageFieldProps {
   field: TemplateField;
   value: string;
   onChange: (value: string) => void;
+  hint?: string;
 }
 
 export default function ImageField({
   field,
   onChange,
   value,
+  hint,
 }: ImageFieldProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +63,11 @@ export default function ImageField({
           rightSection={uploading ? <Loader size={12} /> : undefined}
         />
       </Box>
+      {hint && !value && (
+        <Text size='xs' c='dimmed' fs='italic'>
+          {hint}
+        </Text>
+      )}
       {error && (
         <Text size='xs' c='red'>
           {error}

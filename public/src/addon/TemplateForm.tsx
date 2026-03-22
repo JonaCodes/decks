@@ -10,7 +10,10 @@ import {
   TextInput,
 } from '@mantine/core';
 import { IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react';
-import type { TemplateDefinition } from '@shared/templates/types.js';
+import type {
+  ImageSuggestion,
+  TemplateDefinition,
+} from '@shared/templates/types.js';
 import { sendInsertSlide } from './bridge.js';
 import ImageField from './ImageField.js';
 import TemplateThumbnail from './TemplateThumbnail.js';
@@ -19,15 +22,26 @@ interface TemplateFormProps {
   template: TemplateDefinition;
   onCancel: () => void;
   onSuccess: () => void;
+  initialValues?: Record<string, string>;
+  imageSuggestions?: Record<string, ImageSuggestion>;
+  submitLabel?: string;
+  /** When provided, submit calls onAccept(values) instead of inserting via the bridge. */
+  onAccept?: (values: Record<string, string>) => void;
 }
 
 export function TemplateForm({
   template,
   onCancel,
   onSuccess,
+  initialValues,
+  imageSuggestions,
+  submitLabel = 'Insert slide',
+  onAccept,
 }: TemplateFormProps) {
   const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(template.fields.map((f) => [f.name, '']))
+    Object.fromEntries(
+      template.fields.map((f) => [f.name, initialValues?.[f.name] ?? ''])
+    )
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +53,12 @@ export function TemplateForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (onAccept) {
+      onAccept(values);
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -92,6 +112,13 @@ export function TemplateForm({
                   field={field}
                   value={values[field.name] ?? ''}
                   onChange={(value) => handleChange(field.name, value)}
+                  hint={(() => {
+                    const s = imageSuggestions?.[field.name];
+                    if (!s) return undefined;
+                    return s.reuse_previous_visual
+                      ? `Reuse previous visual — ${s.description}`
+                      : s.description;
+                  })()}
                 />
               ) : (
                 <TextInput
@@ -138,12 +165,12 @@ export function TemplateForm({
         radius={0}
         type='submit'
         size='md'
-        disabled={loading || success}
+        disabled={!onAccept && (loading || success)}
         color='#FFBA00'
         c='black'
         leftSection={loading ? <Loader size={12} color='white' /> : undefined}
       >
-        {loading ? 'Inserting…' : 'Insert slide'}
+        {loading ? 'Inserting…' : submitLabel}
       </Button>
     </form>
   );
