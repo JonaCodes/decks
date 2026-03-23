@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import sequelize from './config/database.js';
 import logger from './logger.js';
 import templateRoutes from './routes/templates.js';
+import customRenderRoute from './custom-render/route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -104,6 +105,7 @@ app.get('/db-health', async (_req, res) => {
 
 // Template catalog + plan-slides API
 app.use(templateRoutes);
+app.use(customRenderRoute);
 
 if (process.env.NODE_ENV === 'production') {
   const buildPath = path.resolve(__dirname, '../../public/dist');

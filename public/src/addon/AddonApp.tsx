@@ -14,6 +14,7 @@ import {
   sendInsertSlide,
   sendUpdateSlideImage,
   sendUpdateSlideText,
+  sendUploadImage,
 } from './bridge.js';
 import { TemplateForm } from './TemplateForm.js';
 import { BrowseView } from './BrowseView.js';
@@ -132,8 +133,26 @@ export function AddonApp() {
       label: string;
       values: Record<string, string>;
       imageSuggestions: Record<string, ImageSuggestion>;
+      customHtml?: string;
+      customCss?: string;
     }> = [];
     for (const slide of slides) {
+      if (slide.type === 'custom') {
+        const tpl = templates.find((t) => t.templateKey === 'custom');
+        if (!tpl) {
+          console.warn('Custom template not found, skipping custom slide');
+          continue;
+        }
+        items.push({
+          templateKey: 'custom',
+          label: tpl.name,
+          values: { title: slide.title },
+          imageSuggestions: {},
+          customHtml: slide.html,
+          customCss: slide.css,
+        });
+        continue;
+      }
       const tpl = templates.find((t) => t.templateKey === slide.template_key);
       if (!tpl) {
         console.warn(`Template key not found, skipping: ${slide.template_key}`);
@@ -162,6 +181,8 @@ export function AddonApp() {
       label: string;
       values: Record<string, string>;
       imageSuggestions: Record<string, ImageSuggestion>;
+      customHtml?: string;
+      customCss?: string;
     }>
   ) {
     const records: SlideRecord[] = [];
@@ -169,6 +190,18 @@ export function AddonApp() {
       if (insertCancelledRef.current) break;
       const item = items[i];
       try {
+        if (item.customHtml) {
+          const renderRes = await redaxios.post(
+            `${API_BASE}/render-custom-slide`,
+            { html: item.customHtml, css: item.customCss ?? '' }
+          );
+          const { base64Data, mimeType } = renderRes.data as {
+            base64Data: string;
+            mimeType: string;
+          };
+          const uploadResult = await sendUploadImage(base64Data, mimeType);
+          item.values.visual = uploadResult.url;
+        }
         const result = await sendInsertSlide(
           item.templateKey,
           item.values,

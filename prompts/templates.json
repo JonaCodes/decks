@@ -333,6 +333,11 @@
         "name": "suggestion",
         "type": "text",
         "required": true
+      },
+      {
+        "name": "visual",
+        "type": "image",
+        "required": false
       }
     ],
     "templateKey": "custom"

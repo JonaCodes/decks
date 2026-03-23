@@ -117,6 +117,20 @@ Respond with ONLY a JSON array. Each element is one of:
 - Set \`reuse_previous_visual: true\` when the same screenshot or diagram from a previous slide applies.
 - Omit \`image_suggestions\` entirely if the slide has no image fields.
 
+### Custom slide
+\`\`\`json
+{
+  "type": "custom",
+  "title": "Slide title",
+  "html": "...",
+  "css": "/* optional additional styles */"
+}
+\`\`\`
+
+Use \`type: "custom"\` only for slides that genuinely need a unique visual: flow diagrams, timelines, side-by-side comparisons, input→output transformations. For everything else, use a standard template.
+
+The subagent handling this slide will read \`prompts/template_examples/custom.md\` for HTML/CSS writing instructions and the full design system reference.
+
 ## Rules
 
 1. Avoid having more than two short sentences on a punchline/key-insight slide unless it makes sense.

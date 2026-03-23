@@ -31,7 +31,14 @@ export interface PlannedTemplateSlide {
   image_suggestions?: Record<string, ImageSuggestion>;
 }
 
-export type PlannedSlide = PlannedTemplateSlide;
+export interface PlannedCustomSlide {
+  type: 'custom';
+  title: string;
+  html: string;
+  css: string;
+}
+
+export type PlannedSlide = PlannedTemplateSlide | PlannedCustomSlide;
 
 export interface InsertSlideResponse {
   slideObjectId: string;

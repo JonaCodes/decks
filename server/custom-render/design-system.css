@@ -1,0 +1,316 @@
+/*
+ * Deck design system — used by Playwright renderer and referenced in the LLM prompt.
+ * Colors, fonts, and utility classes mirror the Google Slides template deck.
+ *
+ * COLOR TOKENS
+ *   --pink  #E91E78   emphasis / keywords
+ *   --navy  #1B2A4A   text / dark backgrounds
+ *   --blue  #3B82F6   section headers / accents
+ *   --white #FFFFFF   backgrounds / text on dark
+ *   --gray  #F3F4F6   light backgrounds
+ */
+
+:root {
+  --pink:      #E91E78;
+  --navy:      #1B2A4A;
+  --blue:      #3B82F6;
+  --white:     #FFFFFF;
+  --gray:      #F3F4F6;
+  --dark-gray: #6B7280;
+  --font:      'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  --radius:    12px;
+  --gap:       24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  font-family: var(--font);
+  background: var(--white);
+  color: var(--navy);
+}
+
+/* ── SLIDE CONTAINER ─────────────────────────────────── */
+
+.slide {
+  width: 1280px;
+  height: 720px;
+  display: flex;
+  flex-direction: column;
+  padding: 56px 72px;
+  gap: var(--gap);
+  overflow: hidden;
+  position: relative;
+}
+
+.slide-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.1;
+  flex-shrink: 0;
+}
+
+.slide-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+}
+
+/* ── LAYOUT HELPERS ──────────────────────────────────── */
+
+.row    { display: flex; flex-direction: row;    align-items: center; gap: var(--gap); }
+.col    { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+.center { display: flex; align-items: center; justify-content: center; }
+.grow   { flex: 1; }
+
+/* ── BOX / CARD ──────────────────────────────────────── */
+
+.box {
+  border-radius: var(--radius);
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.box-navy  { background: var(--navy);  color: var(--white); }
+.box-blue  { background: var(--blue);  color: var(--white); }
+.box-pink  { background: var(--pink);  color: var(--white); }
+.box-gray  { background: var(--gray);  color: var(--navy);  }
+.box-white { background: var(--white); color: var(--navy); border: 2px solid var(--gray); }
+
+.box .label    { font-size: 20px; font-weight: 700; line-height: 1.2; }
+.box .sublabel { font-size: 14px; font-weight: 400; opacity: 0.8;     }
+
+/* ── ARROWS ──────────────────────────────────────────── */
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: var(--dark-gray);
+  flex-shrink: 0;
+}
+
+.arrow-pink { color: var(--pink); }
+.arrow-blue { color: var(--blue); }
+.arrow-navy { color: var(--navy); }
+
+/* ── FLOW LAYOUTS ────────────────────────────────────── */
+/* Use .flow-row for horizontal box chains, .flow-col for vertical */
+
+.flow-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.flow-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.flow-row .box,
+.flow-col .box {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── TIMELINE ────────────────────────────────────────── */
+
+.timeline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  height: 3px;
+  background: var(--blue);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.timeline-nodes {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 700;
+  font-size: 16px;
+  border: 3px solid var(--white);
+  box-shadow: 0 0 0 2px var(--blue);
+}
+
+.timeline-dot-navy { background: var(--navy); box-shadow: 0 0 0 2px var(--navy); }
+.timeline-dot-pink { background: var(--pink); box-shadow: 0 0 0 2px var(--pink); }
+
+.timeline-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: center;
+  max-width: 160px;
+  line-height: 1.3;
+}
+
+.timeline-sublabel {
+  font-size: 12px;
+  color: var(--dark-gray);
+  text-align: center;
+  max-width: 160px;
+}
+
+/* ── COMPARISON (2-COLUMN) ───────────────────────────── */
+
+.comparison {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  width: 100%;
+  height: 100%;
+}
+
+.comparison-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: var(--radius);
+  padding: 28px;
+}
+
+.comparison-col.left  { background: var(--navy); color: var(--white); }
+.comparison-col.right { background: var(--gray);  color: var(--navy); }
+
+.comparison-header {
+  font-size: 22px;
+  font-weight: 700;
+  border-bottom: 2px solid rgba(255,255,255,0.2);
+  padding-bottom: 12px;
+}
+
+.comparison-col.right .comparison-header {
+  border-color: var(--navy);
+  opacity: 0.3;
+}
+
+.comparison-item {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ── HIGHLIGHT BOXES ─────────────────────────────────── */
+
+.highlight {
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.highlight-pink  { background: rgba(233, 30, 120, 0.1); border-left: 4px solid var(--pink);  color: var(--navy); }
+.highlight-blue  { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--blue);  color: var(--navy); }
+.highlight-navy  { background: rgba(27, 42, 74, 0.08);  border-left: 4px solid var(--navy);  color: var(--navy); }
+.highlight-green { background: rgba(34, 197, 94, 0.1);  border-left: 4px solid #22C55E;      color: var(--navy); }
+.highlight-red   { background: rgba(239, 68, 68, 0.1);  border-left: 4px solid #EF4444;      color: var(--navy); }
+
+/* ── CODE BLOCK ──────────────────────────────────────── */
+
+.code-block {
+  background: var(--navy);
+  color: #E2E8F0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.code-pink  { color: var(--pink); }
+.code-blue  { color: #93C5FD; }
+.code-green { color: #86EFAC; }
+.code-gray  { color: #94A3B8; }
+
+/* ── TYPOGRAPHY ──────────────────────────────────────── */
+
+.text-pink  { color: var(--pink); }
+.text-blue  { color: var(--blue); }
+.text-navy  { color: var(--navy); }
+.text-gray  { color: var(--dark-gray); }
+.text-white { color: var(--white); }
+
+.text-sm   { font-size: 14px; }
+.text-base { font-size: 16px; }
+.text-lg   { font-size: 20px; }
+.text-xl   { font-size: 28px; }
+.text-2xl  { font-size: 36px; }
+.text-3xl  { font-size: 48px; }
+
+.font-bold     { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium   { font-weight: 500; }
+
+/* ── BADGE ───────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-pink  { background: var(--pink);  color: var(--white); }
+.badge-blue  { background: var(--blue);  color: var(--white); }
+.badge-navy  { background: var(--navy);  color: var(--white); }
+.badge-gray  { background: var(--gray);  color: var(--navy);  }
