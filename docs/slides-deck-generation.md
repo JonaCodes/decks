@@ -51,8 +51,8 @@ slides into a user's active presentation.
   — core slide-insert logic and `discoverTemplates()` (Apps Script)
 - [`addon/SlideHelpers.gs`](/Users/jona/Documents/projects/decks/addon/SlideHelpers.gs)
   — private helpers used by `SlideOps.gs` (`_parseNoteValue`,
-  `_discoverSlideFields`, `_findTemplateSlide`, `_replaceImagePlaceholder`,
-  `_findSlideById`, `_removeImagePlaceholder`)
+  `_parseDescription`, `_discoverSlideFields`, `_findTemplateSlide`,
+  `_replaceImagePlaceholder`, `_findSlideById`, `_removeImagePlaceholder`)
 - [`addon/appsscript.json`](/Users/jona/Documents/projects/decks/addon/appsscript.json)
   — declares the Slides Advanced Service (`enabledAdvancedServices`) and the
   `script.external_request` scope (`UrlFetchApp`) required for thumbnail
@@ -70,9 +70,12 @@ slides into a user's active presentation.
   `ImageSuggestion`, etc.)
 - [`prompts/slide-planner.ts`](/Users/jona/Documents/projects/decks/prompts/slide-planner.ts)
   — generates the system prompt for the external LLM slide planner; reads
-  `prompts/templates.json` and references `prompts/template_examples/*.md`
+  `prompts/templates.json` and references `prompts/template_examples/*.md` and
+  `prompts/voice-guide.md`
+- [`prompts/voice-guide.md`](/Users/jona/Documents/projects/decks/prompts/voice-guide.md)
+  — presenter voice/style reference read by the planner's voice-pass subagents
 - [`prompts/template_examples/`](/Users/jona/Documents/projects/decks/prompts/template_examples/)
-  — per-template style examples used by the planner's subagents
+  — per-template style examples read by the planner's voice-pass subagents
 
 ## Deployment
 
@@ -92,7 +95,7 @@ For each template slide in the template presentation:
 - speaker notes must include:
   - `template_key: X` — unique key used to look up the slide
   - `name: My Template Name` — human-readable name shown in the sidebar
-  - `description: Short description` — shown in the sidebar
+  - `description: ...` — shown in the sidebar; supports multiple lines; **must be the last field** in the speaker notes
 - text placeholders use `{{FIELD_NAME}}` (required) or `{{?FIELD_NAME}}`
   (optional — omitted from the form if not filled in)
 - image placeholders use image alt-text description `slot:field_name`

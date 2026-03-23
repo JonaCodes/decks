@@ -65,7 +65,7 @@
   },
   {
     "name": "Six Cards",
-    "description": "Use this slide to present up to six non-sequential items, such as tips, pillars, ideas, categories, mistakes to avoid, etc. It works best when each item is short and distinct rather than part of a step-by-step process. Keep the card title and subtext clear, factual, and concise, and put any extra detail in the card explanation.",
+    "description": "Use this slide to present up to six non-sequential items, such as tips, pillars, ideas, categories, mistakes to avoid, etc.\nUse 3-5 cards typically. Only fill all 6 when the content genuinely warrants it (e.g., a long list of pro tips). Never pad to fill slots.\nEach card must be a concrete, standalone point — not relative to other cards, not a buzzword.\nBad card titles: \"Better triggering\" (relative to what?), \"Composable\" (means nothing), \"Scripts when needed\" (a feature, not a point)\nGood card titles: \"Too many tools!\", \"Shellpocalypse Now\", \"MCP ≠ API wrapper\", \"Burns tokens fast\"",
     "fields": [
       {
         "name": "card_3_title",
@@ -167,7 +167,7 @@
   },
   {
     "name": "New Section",
-    "description": "Use this slide as a section break before a new major topic. It should clearly signal a transition, with a short title and subtitle introducing what comes next.",
+    "description": "Use this slide as a section break before a new major topic. It should clearly signal a transition, with a short title and subtitle introducing what comes next. Subtitles are either \\`\"\"\\` or a short quip/cultural reference. Never use the subtitle to summarize what the section covers.\n- Bad: \"Start with Anthropic's built-ins\", \"We'll explore the key concepts\"\n- Good: \"Hold your horses\", \"Beware the thornéd rose\", \\`\"\"\\`",
     "fields": [
       {
         "name": "main_title",
@@ -317,7 +317,7 @@
   },
   {
     "name": "Custom Slide",
-    "description": "Placeholder for custom slides. Make sure to indicate the title as it fits in the sequence. The overview is a brief, few word explanation of the *purpose* of the slide, whereas the suggestion is your suggestion for how to get this objective across with a custom slide.",
+    "description": "Placeholder for custom slides. Make sure to indicate the title as it fits in the sequence. The overview is a brief, few word explanation of the *purpose* of the slide, whereas the suggestion is your suggestion for how to get this objective across with a custom slide.\n**Before reaching for \\`custom\\`, check if an existing template fits:**\nGrid of labeled items → use \\`6_cards\\`\nTwo-line takeaway → use \\`simple_message\\`\nSection break → use \\`new_section_intro\\`\nExercise/project → use \\`exercise\\`\nAn image/screenshot with explanation → use \\`image_and_detailed_highlight\\`\n\n\\`custom\\` is for slides that genuinely need a unique visual: flow diagrams, side-by-side code comparisons, timelines, interactive exercises, input→output transformations.\n\nThe \\`overview\\` field is a **plain-language visual brief** — describe the layout a designer would build (shapes, arrangement, labels). Not content structure, not pedagogical purpose.\nBad: \"Three layers: \\`name\\` and \\`description\\` first, full \\`SKILL.md\\` second...\" (content structure)\nBad: \"Four boxes. Each box says one concrete reason to use a skill.\" (use \\`6_cards\\` instead)\nBad: \"Explain progressive disclosure\" (pedagogical purpose)\nGood: \"Flow diagram: User → Claude → Tool → Result, with curved arrows and step labels\"\nGood: \"Side-by-side screenshots of two code approaches with pink highlight boxes on the differences\"\nGood: \"Horizontal timeline with 4 numbered nodes; short label above each, one-line description below\"",
     "fields": [
       {
         "name": "overview",

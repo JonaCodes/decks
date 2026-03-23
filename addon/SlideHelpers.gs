@@ -18,6 +18,24 @@ function _parseNoteValue(notes, key) {
 }
 
 /**
+ * Parse the description field from speaker notes, supporting multiple lines.
+ * Since description is always the last field, everything from the "description:"
+ * line to the end of the notes is captured.
+ */
+function _parseDescription(notes) {
+  var lines = notes.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].trim().indexOf('description:') === 0) {
+      var firstLine = lines[i].slice(lines[i].indexOf(':') + 1).trim();
+      var rest = lines.slice(i + 1).join('\n').trim();
+      var full = rest ? (firstLine ? firstLine + '\n' + rest : rest) : firstLine;
+      return full || null;
+    }
+  }
+  return null;
+}
+
+/**
  * Discover fields from a single template slide by scanning its elements.
  * - Text elements containing {{FIELD}} → required text field
  * - Text elements containing {{?FIELD}} → optional text field

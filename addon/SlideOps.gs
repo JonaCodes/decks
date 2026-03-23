@@ -31,7 +31,7 @@ var SlideOps = (function () {
       if (!templateKey) continue;
 
       var name = _parseNoteValue(notes, 'name') || templateKey;
-      var description = _parseNoteValue(notes, 'description') || '';
+      var description = _parseDescription(notes) || '';
       var fields = _discoverSlideFields(slides[i]);
 
       var thumbnailUrl = null;
@@ -99,7 +99,7 @@ var SlideOps = (function () {
     var fields = _discoverSlideFields(templateSlide);
     for (var i = 0; i < fields.length; i++) {
       var field = fields[i];
-      if (field.required && field.type !== 'image' && !values[field.name]) {
+      if (field.required && field.type !== 'image' && values[field.name] == null) {
         throw new Error('Missing required field: ' + field.name);
       }
     }

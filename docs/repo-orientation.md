@@ -20,8 +20,8 @@ live.
 - `shared/`: types shared between server and frontend
   (`shared/templates/types.ts`)
 - `prompts/`: slide planner prompt (`slide-planner.ts`), synced template
-  definitions (`templates.json`), and per-template style examples
-  (`template_examples/`)
+  definitions (`templates.json`), presenter voice reference (`voice-guide.md`),
+  and per-template style examples (`template_examples/`)
 - `plans/`: implementation plans, useful for intent but not the source of truth
 
 ## Current state
