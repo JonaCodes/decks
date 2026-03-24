@@ -8,10 +8,6 @@ templates.
 Template deck:
 https://docs.google.com/presentation/d/1U_8lwC2qfrhDg6wM2CBnWcN9Cfpol9_B7RgeGn7NfSQ/
 
-Update the `slides` array in `generate-deck.ts`, then run
-`npx tsx server/scripts/generate-deck.ts` to generate a new presentation with
-the data from `slides` filling in the templates.
-
 ## Fast start
 
 1. Install dependencies:
