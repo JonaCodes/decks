@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import {
+  useBackgroundInserts,
+  TITLE_FIELD_NAME,
+} from './useBackgroundInserts.js';
 import { Box } from '@mantine/core';
 import redaxios from 'redaxios';
 import type {
@@ -33,6 +37,13 @@ export function AddonApp() {
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [retainedTitle, setRetainedTitle] = useState('');
+  const {
+    pending: pendingInserts,
+    errors: insertErrors,
+    insert: backgroundInsert,
+    clearErrors: clearInsertErrors,
+  } = useBackgroundInserts();
 
   // Insert phase state
   const [insertProgress, setInsertProgress] = useState(0);
@@ -121,7 +132,9 @@ export function AddonApp() {
     setSelectedTemplate(null);
   }
 
-  function handleSuccess() {
+  function handleManualInsert(values: Record<string, string>) {
+    setRetainedTitle(values[TITLE_FIELD_NAME] ?? '');
+    backgroundInsert(selectedTemplate!.templateKey, values);
     setView('browse');
     setSelectedTemplate(null);
   }
@@ -306,7 +319,8 @@ export function AddonApp() {
         <TemplateForm
           template={selectedTemplate}
           onCancel={handleCancel}
-          onSuccess={handleSuccess}
+          onSuccess={handleManualInsert}
+          initialValues={{ [TITLE_FIELD_NAME]: retainedTitle }}
         />
       </Box>
     );
@@ -345,6 +359,9 @@ export function AddonApp() {
       onSyncTemplates={handleSyncTemplates}
       onSelectTemplate={handleSelectTemplate}
       onPlanReady={handlePlanReady}
+      pendingInserts={pendingInserts}
+      insertErrors={insertErrors}
+      onClearInsertErrors={clearInsertErrors}
     />
   );
 }

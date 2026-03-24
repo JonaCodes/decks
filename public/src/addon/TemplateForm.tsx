@@ -1,27 +1,17 @@
 import { useState } from 'react';
-import {
-  Alert,
-  Button,
-  Divider,
-  Group,
-  Loader,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
-import { IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react';
+import { Button, Divider, Group, Stack, Text, TextInput } from '@mantine/core';
+import { IconX } from '@tabler/icons-react';
 import type {
   ImageSuggestion,
   TemplateDefinition,
 } from '@shared/templates/types.js';
-import { sendInsertSlide } from './bridge.js';
 import ImageField from './ImageField.js';
 import TemplateThumbnail from './TemplateThumbnail.js';
 
 interface TemplateFormProps {
   template: TemplateDefinition;
   onCancel: () => void;
-  onSuccess: () => void;
+  onSuccess: (values: Record<string, string>) => void;
   initialValues?: Record<string, string>;
   imageSuggestions?: Record<string, ImageSuggestion>;
   submitLabel?: string;
@@ -43,15 +33,12 @@ export function TemplateForm({
       template.fields.map((f) => [f.name, initialValues?.[f.name] ?? ''])
     )
   );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   function handleChange(name: string, value: string) {
     setValues((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (onAccept) {
@@ -59,20 +46,7 @@ export function TemplateForm({
       return;
     }
 
-    setError(null);
-    setLoading(true);
-
-    try {
-      await sendInsertSlide(template.templateKey, values);
-      setSuccess(true);
-      setTimeout(() => {
-        onSuccess();
-      }, 1000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to insert slide.');
-    } finally {
-      setLoading(false);
-    }
+    onSuccess(values);
   }
 
   return (
@@ -87,7 +61,6 @@ export function TemplateForm({
           variant='subtle'
           size='xs'
           onClick={onCancel}
-          disabled={loading}
           color='#FFBA00'
         >
           <IconX size={14} />
@@ -136,41 +109,10 @@ export function TemplateForm({
               )
             )
         )}
-
-        {/* Feedback */}
-        {error && (
-          <Alert
-            icon={<IconAlertCircle size={14} />}
-            color='red'
-            variant='light'
-            p='xs'
-          >
-            <Text size='xs'>{error}</Text>
-          </Alert>
-        )}
-
-        {success && (
-          <Alert
-            icon={<IconCheck size={14} />}
-            color='green'
-            variant='light'
-            p='xs'
-          >
-            <Text size='xs'>Slide inserted successfully!</Text>
-          </Alert>
-        )}
       </Stack>
 
-      <Button
-        radius={0}
-        type='submit'
-        size='md'
-        disabled={!onAccept && (loading || success)}
-        color='#FFBA00'
-        c='black'
-        leftSection={loading ? <Loader size={12} color='white' /> : undefined}
-      >
-        {loading ? 'Inserting…' : submitLabel}
+      <Button radius={0} type='submit' size='md' color='#FFBA00' c='black'>
+        {submitLabel}
       </Button>
     </form>
   );

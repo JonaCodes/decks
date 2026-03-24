@@ -1,7 +1,10 @@
 import {
   ActionIcon,
+  Alert,
   Box,
   Card,
+  Group,
+  Loader,
   ScrollArea,
   Skeleton,
   Stack,
@@ -9,8 +12,11 @@ import {
   TextInput,
   Tooltip,
 } from '@mantine/core';
-import { IconRefresh, IconSearch } from '@tabler/icons-react';
-import type { PlannedSlide, TemplateDefinition } from '@shared/templates/types.js';
+import { IconAlertCircle, IconRefresh, IconSearch } from '@tabler/icons-react';
+import type {
+  PlannedSlide,
+  TemplateDefinition,
+} from '@shared/templates/types.js';
 import { TemplateList } from './TemplateList.js';
 import { ChatBox } from './ChatBox.js';
 
@@ -35,10 +41,13 @@ interface BrowseViewProps {
   loadingTemplates: boolean;
   fetchError: string | null;
   syncing: boolean;
+  pendingInserts: number;
+  insertErrors: string[];
   onSearchChange: (value: string) => void;
   onSyncTemplates: () => void;
   onSelectTemplate: (t: TemplateDefinition) => void;
   onPlanReady: (slides: PlannedSlide[]) => void;
+  onClearInsertErrors: () => void;
 }
 
 export function BrowseView({
@@ -47,13 +56,23 @@ export function BrowseView({
   loadingTemplates,
   fetchError,
   syncing,
+  pendingInserts,
+  insertErrors,
   onSearchChange,
   onSyncTemplates,
   onSelectTemplate,
   onPlanReady,
+  onClearInsertErrors,
 }: BrowseViewProps) {
   return (
-    <Box style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
       {/* Search + Sync */}
       <Box p='xs' style={{ flexShrink: 0, display: 'flex', gap: 6 }}>
         <TextInput
@@ -77,6 +96,32 @@ export function BrowseView({
           </ActionIcon>
         </Tooltip>
       </Box>
+
+      {/* Background insert status */}
+      {(pendingInserts > 0 || insertErrors.length > 0) && (
+        <Box px='xs' pb='xs'>
+          {pendingInserts > 0 && (
+            <Group gap='xs'>
+              <Loader size='xs' color='#FFBA00' />
+              <Text size='xs' c='dimmed'>
+                Inserting {pendingInserts} slide{pendingInserts > 1 ? 's' : ''}…
+              </Text>
+            </Group>
+          )}
+          {insertErrors.length > 0 && (
+            <Alert
+              icon={<IconAlertCircle size={14} />}
+              color='red'
+              variant='light'
+              p='xs'
+              withCloseButton
+              onClose={onClearInsertErrors}
+            >
+              <Text size='xs'>{insertErrors.join('; ')}</Text>
+            </Alert>
+          )}
+        </Box>
+      )}
 
       {/* Template list — scrollable middle section */}
       <ScrollArea style={{ flex: 1 }} px='xs'>

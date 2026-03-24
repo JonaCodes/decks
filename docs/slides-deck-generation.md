@@ -20,9 +20,13 @@ slides into a user's active presentation.
 3. User picks a template, fills in the fields, and submits. Image fields accept
    a URL or a clipboard paste (Cmd+V) — see
    [image-upload-flow.md](/Users/jona/Documents/projects/decks/docs/image-upload-flow.md).
-4. The sidebar sends a `postMessage` via `bridge.ts` → `Sidebar.html` →
-   `google.script.run` (Apps Script).
-5. `SlideOps.gs` finds the matching template slide in the template deck (by
+4. **Insert is fire-and-forget**: the sidebar returns to browse view immediately
+   while the insert runs in the background via `useBackgroundInserts`. A small
+   loader in BrowseView tracks in-flight inserts and surfaces errors. The
+   `title` field value is retained across consecutive manual inserts so users
+   don't have to retype it for each slide.
+5. `bridge.ts` sends a `postMessage` → `Sidebar.html` → `google.script.run`.
+   `SlideOps.gs` finds the matching template slide in the template deck (by
    `template_key` in speaker notes), copies it into the active presentation
    after the currently selected slide, replaces `{{FIELD}}` text placeholders,
    and swaps `slot:field` image placeholders.
@@ -61,7 +65,8 @@ slides into a user's active presentation.
   — iframe wrapper + postMessage bridge
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
   — React sidebar UI (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`,
-  `EditView`, `BrowseView`, `InsertProgress`, `bridge.ts`)
+  `EditView`, `BrowseView`, `InsertProgress`, `useBackgroundInserts`,
+  `bridge.ts`)
 - [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
   — `POST /api/sync-templates` (writes discovered templates to
   `prompts/templates.json` for use in the planner prompt)
@@ -95,7 +100,8 @@ For each template slide in the template presentation:
 - speaker notes must include:
   - `template_key: X` — unique key used to look up the slide
   - `name: My Template Name` — human-readable name shown in the sidebar
-  - `description: ...` — shown in the sidebar; supports multiple lines; **must be the last field** in the speaker notes
+  - `description: ...` — shown in the sidebar; supports multiple lines; **must
+    be the last field** in the speaker notes
 - text placeholders use `{{FIELD_NAME}}` (required) or `{{?FIELD_NAME}}`
   (optional — omitted from the form if not filled in)
 - image placeholders use image alt-text description `slot:field_name`

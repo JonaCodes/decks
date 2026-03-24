@@ -12,7 +12,7 @@ live.
 - `public/`: Vite app
 - `public/src/addon/`: React sidebar UI served inside the add-on iframe
   (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`, `EditView`,
-  `BrowseView`, `InsertProgress`, `bridge.ts`)
+  `BrowseView`, `InsertProgress`, `useBackgroundInserts`, `bridge.ts`)
 - `server/`: Express server, integrations, scripts
 - `server/routes/`: Express route handlers (`templates.ts` —
   `POST /api/sync-templates`)
@@ -28,12 +28,13 @@ live.
 
 - The Google Slides add-on is the primary flow. Two ways to insert slides:
   1. **Single slide**: pick a template in the sidebar, fill fields, insert.
+     Insert runs in the background (non-blocking) — sidebar returns to browse
+     immediately. The `title` field is retained across consecutive inserts.
   2. **Batch from plan**: generate a deck plan with an external LLM using the
      prompt from `prompts/slide-planner.ts`, paste the JSON into the sidebar's
-     ChatBox — all slides insert immediately at the end of the presentation.
-     The addon enters edit mode where the user can edit text and images
-     in place for whichever slide they're viewing, then clicks "Done" to
-     finalize.
+     ChatBox — all slides insert immediately at the end of the presentation. The
+     addon enters edit mode where the user can edit text and images in place for
+     whichever slide they're viewing, then clicks "Done" to finalize.
 - `public/src/addon/` is the active React frontend (sidebar UI). The rest of
   `public/src/` (main Vite app) is still unused.
 - The old local-script generation flow (`server/scripts/generate-deck.ts`) is no
