@@ -29,7 +29,9 @@ slides into a user's active presentation.
    `SlideOps.gs` finds the matching template slide in the template deck (by
    `template_key` in speaker notes), copies it into the active presentation
    after the currently selected slide, replaces `{{FIELD}}` text placeholders,
-   and swaps `slot:field` image placeholders.
+   and swaps `slot:field` image placeholders. Each inserted text element is
+   tagged with a `field:<name>` description marker so it can be found later for
+   batch editing.
 
 ### Batch insert from a deck plan
 
@@ -47,6 +49,22 @@ slides into a user's active presentation.
    propagate to later slides marked `reuse_previous_visual`. When the user
    clicks "Done", remaining placeholders are cleaned up.
 
+### Batch edit inserted slides
+
+1. Select one or more already-inserted template slides in the Google Slides
+   filmstrip.
+2. Click the pencil icon in the sidebar to enter **batch-edit mode**.
+3. `BatchEditOps.getSelectedSlidesMetadata()` reads the selected slides,
+   scanning for `field:` and `slot:` description markers left behind during
+   insertion, and returns the current values for each field.
+4. The sidebar shows a form with unique text field names across the selection.
+   If a field has the same value on all slides, it's pre-filled; otherwise, the
+   placeholder shows `(mixed)`.
+5. Edit a field; on blur, `BatchEditOps.updateSlideFieldText()` is called
+   fire-and-forget for every slide that has that field. Local state updates
+   optimistically.
+6. Click "Done" to return to browse view.
+
 ## Main code
 
 - [`addon/Code.gs`](/Users/jona/Documents/projects/decks/addon/Code.gs) — add-on
@@ -54,9 +72,13 @@ slides into a user's active presentation.
 - [`addon/SlideOps.gs`](/Users/jona/Documents/projects/decks/addon/SlideOps.gs)
   — core slide-insert logic and `discoverTemplates()` (Apps Script)
 - [`addon/SlideHelpers.gs`](/Users/jona/Documents/projects/decks/addon/SlideHelpers.gs)
-  — private helpers used by `SlideOps.gs` (`_parseNoteValue`,
-  `_parseDescription`, `_discoverSlideFields`, `_findTemplateSlide`,
-  `_replaceImagePlaceholder`, `_findSlideById`, `_removeImagePlaceholder`)
+  — private helpers shared across `SlideOps.gs` and `BatchEditOps.gs`
+  (`_parseNoteValue`, `_parseDescription`, `_discoverSlideFields`,
+  `_findTemplateSlide`, `_replaceImagePlaceholder`, `_findSlideById`,
+  `_removeImagePlaceholder`, `_readSlideFieldValues`)
+- [`addon/BatchEditOps.gs`](/Users/jona/Documents/projects/decks/addon/BatchEditOps.gs)
+  — batch edit logic (`getSelectedSlidesMetadata()`, `updateSlideFieldText()`)
+  (Apps Script)
 - [`addon/appsscript.json`](/Users/jona/Documents/projects/decks/addon/appsscript.json)
   — declares the Slides Advanced Service (`enabledAdvancedServices`) and the
   `script.external_request` scope (`UrlFetchApp`) required for thumbnail
@@ -65,14 +87,14 @@ slides into a user's active presentation.
   — iframe wrapper + postMessage bridge
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
   — React sidebar UI (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`,
-  `EditView`, `BrowseView`, `InsertProgress`, `useBackgroundInserts`,
-  `bridge.ts`)
+  `EditView`, `BrowseView`, `InsertProgress`, `BatchEditView`, `useInsertPhase`,
+  `useBatchEdit`, `bridge.ts`)
 - [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
   — `POST /api/sync-templates` (writes discovered templates to
   `prompts/templates.json` for use in the planner prompt)
 - [`shared/templates/types.ts`](/Users/jona/Documents/projects/decks/shared/templates/types.ts)
   — canonical shared types (`TemplateDefinition`, `PlannedSlide`, `SlideRecord`,
-  `ImageSuggestion`, etc.)
+  `ImageSuggestion`, `SlideFieldValue`, `SlideMetadata`, etc.)
 - [`prompts/slide-planner.ts`](/Users/jona/Documents/projects/decks/prompts/slide-planner.ts)
   — generates the system prompt for the external LLM slide planner; reads
   `prompts/templates.json` and references `prompts/template_examples/*.md` and

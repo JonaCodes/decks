@@ -68,3 +68,11 @@ function updateSlideText(payload) {
 function finalizeSlide(payload) {
   return SlideOps.finalizeSlide(payload);
 }
+
+function updateSlideFieldText(payload) {
+  return BatchEditOps.updateSlideFieldText(payload);
+}
+
+function getSelectedSlidesMetadata() {
+  return BatchEditOps.getSelectedSlidesMetadata();
+}

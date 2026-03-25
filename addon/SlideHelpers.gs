@@ -1,6 +1,9 @@
 // Private helpers shared across SlideOps — loaded before SlideOps.gs.
 // All functions are global (Apps Script shares one scope across .gs files).
 
+var FIELD_MARKER_PREFIX = 'field:';
+var SLOT_MARKER_PREFIX = 'slot:';
+
 /**
  * Parse a "key: value" line from speaker notes text.
  * Returns the trimmed value string, or null if not found.
@@ -27,8 +30,15 @@ function _parseDescription(notes) {
   for (var i = 0; i < lines.length; i++) {
     if (lines[i].trim().indexOf('description:') === 0) {
       var firstLine = lines[i].slice(lines[i].indexOf(':') + 1).trim();
-      var rest = lines.slice(i + 1).join('\n').trim();
-      var full = rest ? (firstLine ? firstLine + '\n' + rest : rest) : firstLine;
+      var rest = lines
+        .slice(i + 1)
+        .join('\n')
+        .trim();
+      var full = rest
+        ? firstLine
+          ? firstLine + '\n' + rest
+          : rest
+        : firstLine;
       return full || null;
     }
   }
@@ -133,7 +143,9 @@ function _removeImagePlaceholder(slide, fieldName) {
         el.remove();
         return;
       }
-    } catch (e) { /* skip */ }
+    } catch (e) {
+      /* skip */
+    }
   }
 }
 
@@ -152,19 +164,72 @@ function _findSlideById(slideObjectId) {
 }
 
 /**
+ * Read current field values from a slide by scanning page elements for
+ * field: and slot: description markers.
+ * - field:name → text field; value is current text (placeholder text normalized to '')
+ * - slot:name / slot:?name → image field; value is '' (image batch edit deferred)
+ * If the same field name appears on multiple elements, the first occurrence wins.
+ * @returns {Object} Record<string, { type: 'text'|'image', value: string }>
+ */
+function _readSlideFieldValues(slide) {
+  var result = {};
+  var elements = slide.getPageElements();
+
+  for (var i = 0; i < elements.length; i++) {
+    var el = elements[i];
+    var desc = '';
+    try {
+      desc = el.getDescription ? el.getDescription() : '';
+    } catch (e) {
+      continue;
+    }
+
+    if (desc && desc.indexOf(FIELD_MARKER_PREFIX) === 0) {
+      var fieldName = desc.slice(FIELD_MARKER_PREFIX.length).trim();
+      if (fieldName && !result[fieldName]) {
+        var value = '';
+        try {
+          var text = el.asShape().getText().asString();
+          text = text.replace(/\n$/, ''); // trim trailing newline asString() appends
+          // Normalize unfilled placeholder text to empty string
+          if (/^\{\{\??[A-Z0-9_]+\}\}$/.test(text.trim())) {
+            text = '';
+          }
+          value = text;
+        } catch (e) {
+          // Element not accessible as shape; leave value empty
+        }
+        result[fieldName] = { type: 'text', value: value };
+      }
+    } else if (desc && desc.indexOf(SLOT_MARKER_PREFIX) === 0) {
+      var slotSuffix = desc.slice(SLOT_MARKER_PREFIX.length);
+      var imgField =
+        slotSuffix.charAt(0) === '?'
+          ? slotSuffix.slice(1).trim()
+          : slotSuffix.trim();
+      if (imgField && !result[imgField]) {
+        result[imgField] = { type: 'image', value: '' };
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Find an image on the slide with alt-text "slot:field_name" or
  * "slot:?field_name" and replace it in place so existing element styling is
  * preserved.
  */
 function _replaceImagePlaceholder(slide, fieldName, imageUrl) {
-  var slotTag = 'slot:' + fieldName;
+  var slotTag = SLOT_MARKER_PREFIX + fieldName;
   var elements = slide.getPageElements();
   for (var i = 0; i < elements.length; i++) {
     var el = elements[i];
     var matched = false;
     try {
       var d = el.getDescription ? el.getDescription() : '';
-      matched = d === slotTag || d === 'slot:?' + fieldName;
+      matched = d === slotTag || d === SLOT_MARKER_PREFIX + '?' + fieldName;
     } catch (e) {
       // Some element types do not support getDescription; skip.
       continue;

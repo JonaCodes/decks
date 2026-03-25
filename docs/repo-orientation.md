@@ -8,11 +8,12 @@ live.
 ## Layout
 
 - `addon/`: Google Slides add-on (Apps Script — `Code.gs`, `SlideOps.gs`,
-  `Sidebar.html`, clasp config)
+  `BatchEditOps.gs`, `SlideHelpers.gs`, `Sidebar.html`, clasp config)
 - `public/`: Vite app
 - `public/src/addon/`: React sidebar UI served inside the add-on iframe
   (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`, `EditView`,
-  `BrowseView`, `InsertProgress`, `useBackgroundInserts`, `bridge.ts`)
+  `BrowseView`, `InsertProgress`, `BatchEditView`, `useInsertPhase`,
+  `useBatchEdit`, `bridge.ts`)
 - `server/`: Express server, integrations, scripts
 - `server/routes/`: Express route handlers (`templates.ts` —
   `POST /api/sync-templates`)
@@ -26,7 +27,7 @@ live.
 
 ## Current state
 
-- The Google Slides add-on is the primary flow. Two ways to insert slides:
+- The Google Slides add-on is the primary flow. Three ways to work with slides:
   1. **Single slide**: pick a template in the sidebar, fill fields, insert.
      Insert runs in the background (non-blocking) — sidebar returns to browse
      immediately. The `title` field is retained across consecutive inserts.
@@ -35,6 +36,9 @@ live.
      ChatBox — all slides insert immediately at the end of the presentation. The
      addon enters edit mode where the user can edit text and images in place for
      whichever slide they're viewing, then clicks "Done" to finalize.
+  3. **Batch edit inserted slides**: select already-inserted template slides in
+     the filmstrip, click the pencil icon in the sidebar, edit shared text
+     fields across all selected slides at once.
 - `public/src/addon/` is the active React frontend (sidebar UI). The rest of
   `public/src/` (main Vite app) is still unused.
 - The old local-script generation flow (`server/scripts/generate-deck.ts`) is no

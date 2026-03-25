@@ -99,7 +99,11 @@ var SlideOps = (function () {
     var fields = _discoverSlideFields(templateSlide);
     for (var i = 0; i < fields.length; i++) {
       var field = fields[i];
-      if (field.required && field.type !== 'image' && values[field.name] == null) {
+      if (
+        field.required &&
+        field.type !== 'image' &&
+        values[field.name] == null
+      ) {
         throw new Error('Missing required field: ' + field.name);
       }
     }
@@ -126,6 +130,26 @@ var SlideOps = (function () {
 
     // Copy template slide into active presentation
     var inserted = activePresentation.insertSlide(insertIndex, templateSlide);
+
+    // Mark text elements with field: descriptions for batch editing.
+    // Must happen before placeholder replacement so we can detect placeholders.
+    var insertedElements = inserted.getPageElements();
+    for (var ei = 0; ei < insertedElements.length; ei++) {
+      var el = insertedElements[ei];
+      try {
+        var shape = el.asShape ? el.asShape() : null;
+        if (!shape) continue;
+        var shapeText = shape.getText().asString();
+        var optM = shapeText.match(/\{\{\?([A-Z0-9_]+)\}\}/i);
+        var reqM = shapeText.match(/\{\{([A-Z0-9_]+)\}\}/i);
+        var fieldMatch = optM || reqM;
+        if (fieldMatch) {
+          el.setDescription(FIELD_MARKER_PREFIX + fieldMatch[1].toLowerCase());
+        }
+      } catch (e) {
+        // Element is not a shape or doesn't support description; skip.
+      }
+    }
 
     // Replace text placeholders: {{FIELD_NAME_UPPERCASE}} or {{?FIELD_NAME_UPPERCASE}}
     // Only replace when a value is provided — leave placeholder text intact for post-insert editing.
@@ -199,7 +223,9 @@ var SlideOps = (function () {
 
   function getCurrentSlideId() {
     try {
-      var page = SlidesApp.getActivePresentation().getSelection().getCurrentPage();
+      var page = SlidesApp.getActivePresentation()
+        .getSelection()
+        .getCurrentPage();
       return { slideObjectId: page ? page.getObjectId() : null };
     } catch (e) {
       return { slideObjectId: null };

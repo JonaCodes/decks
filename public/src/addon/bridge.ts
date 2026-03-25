@@ -1,5 +1,6 @@
 import type {
   InsertSlideResponse,
+  SlideMetadata,
   TemplateDefinition,
 } from '@shared/templates/types.js';
 
@@ -76,6 +77,22 @@ window.addEventListener('message', (event) => {
   }
 
   if (data.type === 'finalizeSlideResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) p.reject(new Error(data.error));
+    else p.resolve(data.result);
+  }
+
+  if (data.type === 'updateSlideFieldTextResult') {
+    const p = pending.get(data.id);
+    if (!p) return;
+    pending.delete(data.id);
+    if (data.error) p.reject(new Error(data.error));
+    else p.resolve(data.result);
+  }
+
+  if (data.type === 'getSelectedSlidesMetadataResult') {
     const p = pending.get(data.id);
     if (!p) return;
     pending.delete(data.id);
@@ -211,5 +228,32 @@ export function sendUpdateSlideText(
       },
       '*'
     );
+  });
+}
+
+export function sendUpdateSlideFieldText(
+  slideObjectId: string,
+  fieldName: string,
+  newValue: string
+): Promise<void> {
+  const id = generateId();
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage(
+      {
+        type: 'updateSlideFieldText',
+        id,
+        payload: { slideObjectId, fieldName, newValue },
+      },
+      '*'
+    );
+  });
+}
+
+export function sendGetSelectedSlidesMetadata(): Promise<SlideMetadata[]> {
+  const id = generateId();
+  return new Promise<SlideMetadata[]>((resolve, reject) => {
+    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+    window.parent.postMessage({ type: 'getSelectedSlidesMetadata', id }, '*');
   });
 }

@@ -12,7 +12,12 @@ import {
   TextInput,
   Tooltip,
 } from '@mantine/core';
-import { IconAlertCircle, IconRefresh, IconSearch } from '@tabler/icons-react';
+import {
+  IconAlertCircle,
+  IconPencil,
+  IconRefresh,
+  IconSearch,
+} from '@tabler/icons-react';
 import type {
   PlannedSlide,
   TemplateDefinition,
@@ -48,6 +53,7 @@ interface BrowseViewProps {
   onSelectTemplate: (t: TemplateDefinition) => void;
   onPlanReady: (slides: PlannedSlide[]) => void;
   onClearInsertErrors: () => void;
+  onBatchEdit: () => void;
 }
 
 export function BrowseView({
@@ -63,6 +69,7 @@ export function BrowseView({
   onSelectTemplate,
   onPlanReady,
   onClearInsertErrors,
+  onBatchEdit,
 }: BrowseViewProps) {
   return (
     <Box
@@ -83,6 +90,17 @@ export function BrowseView({
           size='xs'
           style={{ flex: 1 }}
         />
+        <Tooltip label='Batch edit selected slides' position='bottom'>
+          <ActionIcon
+            onClick={onBatchEdit}
+            variant='subtle'
+            size='md'
+            aria-label='Batch edit'
+            mt={1}
+          >
+            <IconPencil size={14} />
+          </ActionIcon>
+        </Tooltip>
         <Tooltip label='Sync templates to prompt file' position='bottom'>
           <ActionIcon
             onClick={onSyncTemplates}

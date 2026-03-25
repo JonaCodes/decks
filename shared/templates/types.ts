@@ -37,6 +37,17 @@ export interface InsertSlideResponse {
   slideObjectId: string;
 }
 
+export interface SlideFieldValue {
+  type: FieldType;
+  value: string;
+}
+
+export interface SlideMetadata {
+  slideObjectId: string;
+  templateKey: string;
+  fields: Record<string, SlideFieldValue>;
+}
+
 export interface SlideRecord {
   slideObjectId: string;
   templateKey: string;

@@ -133,7 +133,11 @@
             })
             .withFailureHandler(function (err) {
               frame.contentWindow.postMessage(
-                { type: 'getCurrentSlideResult', id: msg.id, error: String(err) },
+                {
+                  type: 'getCurrentSlideResult',
+                  id: msg.id,
+                  error: String(err),
+                },
                 '*'
               );
             })
@@ -150,7 +154,11 @@
             })
             .withFailureHandler(function (err) {
               frame.contentWindow.postMessage(
-                { type: 'updateSlideImageResult', id: msg.id, error: String(err) },
+                {
+                  type: 'updateSlideImageResult',
+                  id: msg.id,
+                  error: String(err),
+                },
                 '*'
               );
             })
@@ -167,7 +175,11 @@
             })
             .withFailureHandler(function (err) {
               frame.contentWindow.postMessage(
-                { type: 'updateSlideTextResult', id: msg.id, error: String(err) },
+                {
+                  type: 'updateSlideTextResult',
+                  id: msg.id,
+                  error: String(err),
+                },
                 '*'
               );
             })
@@ -189,6 +201,56 @@
               );
             })
             .finalizeSlide(msg.payload);
+        }
+
+        if (msg.type === 'updateSlideFieldText') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                {
+                  type: 'updateSlideFieldTextResult',
+                  id: msg.id,
+                  result: result,
+                },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                {
+                  type: 'updateSlideFieldTextResult',
+                  id: msg.id,
+                  error: String(err),
+                },
+                '*'
+              );
+            })
+            .updateSlideFieldText(msg.payload);
+        }
+
+        if (msg.type === 'getSelectedSlidesMetadata') {
+          google.script.run
+            .withSuccessHandler(function (result) {
+              frame.contentWindow.postMessage(
+                {
+                  type: 'getSelectedSlidesMetadataResult',
+                  id: msg.id,
+                  result: result,
+                },
+                '*'
+              );
+            })
+            .withFailureHandler(function (err) {
+              frame.contentWindow.postMessage(
+                {
+                  type: 'getSelectedSlidesMetadataResult',
+                  id: msg.id,
+                  error: String(err),
+                },
+                '*'
+              );
+            })
+            .getSelectedSlidesMetadata();
         }
       });
     </script>
