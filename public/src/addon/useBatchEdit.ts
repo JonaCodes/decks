@@ -9,38 +9,49 @@ export function useBatchEdit(
   onViewChange: (view: 'batch-editing' | 'browse') => void
 ) {
   const [batchSlides, setBatchSlides] = useState<SlideMetadata[]>([]);
+  const [batchLoading, setBatchLoading] = useState(false);
 
   async function handleBatchEdit() {
-    const results = await sendGetSelectedSlidesMetadata();
-    if (results.length === 0) return;
-    setBatchSlides(results);
-    onViewChange('batch-editing');
+    setBatchLoading(true);
+    try {
+      const results = await sendGetSelectedSlidesMetadata();
+      if (results.length === 0) return;
+      setBatchSlides(results);
+      onViewChange('batch-editing');
+    } finally {
+      setBatchLoading(false);
+    }
   }
 
-  function handleBatchFieldChange(fieldName: string, newValue: string) {
+  async function handleBatchUpdate(
+    changes: Record<string, string>
+  ): Promise<void> {
+    const promises: Promise<void>[] = [];
     for (const slide of batchSlides) {
-      if (
-        fieldName in slide.fields &&
-        slide.fields[fieldName].type === 'text'
-      ) {
-        sendUpdateSlideFieldText(
-          slide.slideObjectId,
-          fieldName,
-          newValue
-        ).catch(console.error);
+      for (const [fieldName, newValue] of Object.entries(changes)) {
+        if (
+          fieldName in slide.fields &&
+          slide.fields[fieldName].type === 'text'
+        ) {
+          promises.push(
+            sendUpdateSlideFieldText(slide.slideObjectId, fieldName, newValue)
+          );
+        }
       }
     }
+    await Promise.all(promises);
     setBatchSlides((prev) =>
       prev.map((s) => {
-        if (!(fieldName in s.fields) || s.fields[fieldName].type !== 'text')
-          return s;
-        return {
-          ...s,
-          fields: {
-            ...s.fields,
-            [fieldName]: { type: 'text', value: newValue },
-          },
-        };
+        const updatedFields = { ...s.fields };
+        for (const [fieldName, newValue] of Object.entries(changes)) {
+          if (
+            fieldName in updatedFields &&
+            updatedFields[fieldName].type === 'text'
+          ) {
+            updatedFields[fieldName] = { type: 'text', value: newValue };
+          }
+        }
+        return { ...s, fields: updatedFields };
       })
     );
   }
@@ -52,8 +63,9 @@ export function useBatchEdit(
 
   return {
     batchSlides,
+    batchLoading,
     handleBatchEdit,
-    handleBatchFieldChange,
+    handleBatchUpdate,
     handleBatchDone,
   };
 }

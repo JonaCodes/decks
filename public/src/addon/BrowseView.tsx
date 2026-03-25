@@ -54,6 +54,7 @@ interface BrowseViewProps {
   onPlanReady: (slides: PlannedSlide[]) => void;
   onClearInsertErrors: () => void;
   onBatchEdit: () => void;
+  batchLoading: boolean;
 }
 
 export function BrowseView({
@@ -70,6 +71,7 @@ export function BrowseView({
   onPlanReady,
   onClearInsertErrors,
   onBatchEdit,
+  batchLoading,
 }: BrowseViewProps) {
   return (
     <Box
@@ -93,6 +95,7 @@ export function BrowseView({
         <Tooltip label='Batch edit selected slides' position='bottom'>
           <ActionIcon
             onClick={onBatchEdit}
+            loading={batchLoading}
             variant='subtle'
             size='md'
             aria-label='Batch edit'

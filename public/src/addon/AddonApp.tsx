@@ -44,14 +44,15 @@ export function AddonApp() {
     editingTemplate,
     handlePlanReady,
     handleCancelInsert,
-    handleFieldChange,
+    handleUpdate,
     handleDoneEditing,
   } = useInsertPhase(templates, view === 'editing', setView);
 
   const {
     batchSlides,
+    batchLoading,
     handleBatchEdit,
-    handleBatchFieldChange,
+    handleBatchUpdate,
     handleBatchDone,
   } = useBatchEdit(setView);
 
@@ -152,7 +153,7 @@ export function AddonApp() {
       <EditView
         slideRecord={editingRecord}
         template={editingTemplate}
-        onFieldChange={handleFieldChange}
+        onUpdate={handleUpdate}
         onDone={handleDoneEditing}
       />
     );
@@ -162,7 +163,7 @@ export function AddonApp() {
     return (
       <BatchEditView
         slides={batchSlides}
-        onFieldChange={handleBatchFieldChange}
+        onUpdate={handleBatchUpdate}
         onDone={handleBatchDone}
       />
     );
@@ -183,6 +184,7 @@ export function AddonApp() {
       insertErrors={insertErrors}
       onClearInsertErrors={clearInsertErrors}
       onBatchEdit={handleBatchEdit}
+      batchLoading={batchLoading}
     />
   );
 }

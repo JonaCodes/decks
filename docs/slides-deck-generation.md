@@ -45,24 +45,28 @@ slides into a user's active presentation.
    Placeholders (text and image) are preserved during insertion for later
    editing.
 4. The add-on enters **edit mode**: it polls the current slide and shows
-   editable fields for whichever slide the user is viewing. Image changes
-   propagate to later slides marked `reuse_previous_visual`. When the user
-   clicks "Done", remaining placeholders are cleaned up.
+   editable fields for whichever slide the user is viewing. User clicks the
+   "Update" button to save changes to the current slide (text and image updates
+   apply via `Promise.all`, with loading feedback). Image changes propagate to
+   later slides marked `reuse_previous_visual`. When the user clicks "Done",
+   remaining placeholders are cleaned up.
 
 ### Batch edit inserted slides
 
 1. Select one or more already-inserted template slides in the Google Slides
    filmstrip.
-2. Click the pencil icon in the sidebar to enter **batch-edit mode**.
+2. Click the pencil icon in the sidebar (shows loading spinner during metadata
+   fetch) to enter **batch-edit mode**.
 3. `BatchEditOps.getSelectedSlidesMetadata()` reads the selected slides,
    scanning for `field:` and `slot:` description markers left behind during
    insertion, and returns the current values for each field.
 4. The sidebar shows a form with unique text field names across the selection.
    If a field has the same value on all slides, it's pre-filled; otherwise, the
    placeholder shows `(mixed)`.
-5. Edit a field; on blur, `BatchEditOps.updateSlideFieldText()` is called
-   fire-and-forget for every slide that has that field. Local state updates
-   optimistically.
+5. Edit fields; click the "Update" button to save changes. All field updates
+   across all selected slides are sent via `Promise.all` (button shows loading
+   state). Local state updates after server confirms. Errors are shown in an
+   alert above the button.
 6. Click "Done" to return to browse view.
 
 ## Main code
@@ -88,7 +92,9 @@ slides into a user's active presentation.
 - [`public/src/addon/`](/Users/jona/Documents/projects/decks/public/src/addon/)
   — React sidebar UI (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`,
   `EditView`, `BrowseView`, `InsertProgress`, `BatchEditView`, `useInsertPhase`,
-  `useBatchEdit`, `bridge.ts`)
+  `useBatchEdit`, `useDirtyForm`, `bridge.ts`). `useDirtyForm` tracks form
+  state, dirty fields, and reset logic — used by `EditView` and `BatchEditView`
+  for the explicit "Update" button flow.
 - [`server/routes/templates.ts`](/Users/jona/Documents/projects/decks/server/routes/templates.ts)
   — `POST /api/sync-templates` (writes discovered templates to
   `prompts/templates.json` for use in the planner prompt)

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   Divider,
@@ -7,19 +9,24 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import type { SlideMetadata } from '@shared/templates/types.js';
+import { useDirtyForm } from './useDirtyForm.js';
 
 interface BatchEditViewProps {
   slides: SlideMetadata[];
-  onFieldChange: (fieldName: string, newValue: string) => void;
+  onUpdate: (changes: Record<string, string>) => Promise<void>;
   onDone: () => void;
 }
 
 export function BatchEditView({
   slides,
-  onFieldChange,
+  onUpdate,
   onDone,
 }: BatchEditViewProps) {
+  const [updating, setUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
   const allFieldNames = Array.from(
     new Set(
       slides.flatMap((s) =>
@@ -30,23 +37,43 @@ export function BatchEditView({
     )
   ).sort();
 
-  function getTextValues(fieldName: string): string[] {
-    return slides
+  function getDisplayValue(fieldName: string): string {
+    const values = slides
       .filter(
         (s) => fieldName in s.fields && s.fields[fieldName].type === 'text'
       )
       .map((s) => s.fields[fieldName].value);
-  }
-
-  function getDisplayValue(fieldName: string): string {
-    const values = getTextValues(fieldName);
     if (values.length === 0) return '';
     return values.every((v) => v === values[0]) ? values[0] : '';
   }
 
   function isMixed(fieldName: string): boolean {
-    const values = getTextValues(fieldName);
+    const values = slides
+      .filter(
+        (s) => fieldName in s.fields && s.fields[fieldName].type === 'text'
+      )
+      .map((s) => s.fields[fieldName].value);
     return values.length > 1 && !values.every((v) => v === values[0]);
+  }
+
+  const resetKey = slides.map((s) => s.slideObjectId).join(',');
+  const initialValues = Object.fromEntries(
+    allFieldNames.map((name) => [name, getDisplayValue(name)])
+  );
+  const { formValues, setField, dirtyFields, isDirty, resetDirty } =
+    useDirtyForm(initialValues, resetKey);
+
+  async function handleUpdate() {
+    setUpdating(true);
+    setUpdateError(null);
+    try {
+      await onUpdate(dirtyFields);
+      resetDirty();
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : 'Update failed');
+    } finally {
+      setUpdating(false);
+    }
   }
 
   return (
@@ -62,7 +89,7 @@ export function BatchEditView({
         <Text size='sm'>
           Editing {slides.length} slide{slides.length !== 1 ? 's' : ''}
         </Text>
-        <Button size='xs' variant='subtle' onClick={onDone}>
+        <Button size='xs' variant='subtle' onClick={onDone} disabled={updating}>
           Done
         </Button>
       </Group>
@@ -80,16 +107,36 @@ export function BatchEditView({
               placeholder={
                 isMixed(fieldName) ? '(mixed)' : `Enter ${fieldName}`
               }
-              defaultValue={getDisplayValue(fieldName)}
-              onBlur={(e) => {
-                const newValue = e.currentTarget.value;
-                onFieldChange(fieldName, newValue);
-              }}
+              value={formValues[fieldName] ?? ''}
+              onChange={(e) => setField(fieldName, e.currentTarget.value)}
               size='xs'
             />
           ))
         )}
       </Stack>
+      <Box p='xs' style={{ flexShrink: 0 }}>
+        {updateError && (
+          <Alert
+            icon={<IconAlertCircle size={14} />}
+            color='red'
+            variant='light'
+            p='xs'
+            mb='xs'
+            withCloseButton
+            onClose={() => setUpdateError(null)}
+          >
+            <Text size='xs'>{updateError}</Text>
+          </Alert>
+        )}
+        <Button
+          fullWidth
+          disabled={!isDirty || updating}
+          loading={updating}
+          onClick={handleUpdate}
+        >
+          Update
+        </Button>
+      </Box>
     </Box>
   );
 }

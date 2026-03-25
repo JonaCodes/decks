@@ -13,7 +13,7 @@ live.
 - `public/src/addon/`: React sidebar UI served inside the add-on iframe
   (`AddonApp`, `TemplateForm`, `ImageField`, `ChatBox`, `EditView`,
   `BrowseView`, `InsertProgress`, `BatchEditView`, `useInsertPhase`,
-  `useBatchEdit`, `bridge.ts`)
+  `useBatchEdit`, `useDirtyForm`, `bridge.ts`)
 - `server/`: Express server, integrations, scripts
 - `server/routes/`: Express route handlers (`templates.ts` —
   `POST /api/sync-templates`)

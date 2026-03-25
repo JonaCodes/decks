@@ -118,60 +118,70 @@ export function useInsertPhase(
     onViewChange('browse');
   }
 
-  function handleFieldChange(fieldName: string, newValue: string) {
+  async function handleUpdate(changes: Record<string, string>): Promise<void> {
     const record = insertedSlides.find(
       (r) => r.slideObjectId === currentSlideId
     );
     if (!record) return;
 
-    const oldValue = record.values[fieldName] ?? '';
     const template = templates.find(
       (t) => t.templateKey === record.templateKey
     );
-    const field = template?.fields.find((f) => f.name === fieldName);
+    const promises: Promise<void>[] = [];
 
-    if (field?.type === 'image') {
-      sendUpdateSlideImage(record.slideObjectId, fieldName, newValue).catch(
-        console.error
-      );
-      insertedSlides
-        .filter(
-          (r) =>
+    for (const [fieldName, newValue] of Object.entries(changes)) {
+      const field = template?.fields.find((f) => f.name === fieldName);
+      if (field?.type === 'image') {
+        promises.push(
+          sendUpdateSlideImage(record.slideObjectId, fieldName, newValue)
+        );
+        for (const r of insertedSlides) {
+          if (
             r.insertionIndex > record.insertionIndex &&
             r.imageSuggestions[fieldName]?.reuse_previous_visual
-        )
-        .forEach((r) => {
-          sendUpdateSlideImage(r.slideObjectId, fieldName, newValue).catch(
-            console.error
-          );
-        });
-      setInsertedSlides((prev) =>
-        prev.map((r) => {
-          if (
-            r.slideObjectId === record.slideObjectId ||
-            (r.insertionIndex > record.insertionIndex &&
-              r.imageSuggestions[fieldName]?.reuse_previous_visual)
           ) {
-            return { ...r, values: { ...r.values, [fieldName]: newValue } };
+            promises.push(
+              sendUpdateSlideImage(r.slideObjectId, fieldName, newValue)
+            );
           }
-          return r;
-        })
-      );
-    } else {
-      sendUpdateSlideText(
-        record.slideObjectId,
-        fieldName,
-        oldValue,
-        newValue
-      ).catch(console.error);
-      setInsertedSlides((prev) =>
-        prev.map((r) =>
-          r.slideObjectId === record.slideObjectId
-            ? { ...r, values: { ...r.values, [fieldName]: newValue } }
-            : r
-        )
-      );
+        }
+      } else {
+        const oldValue = record.values[fieldName] ?? '';
+        promises.push(
+          sendUpdateSlideText(
+            record.slideObjectId,
+            fieldName,
+            oldValue,
+            newValue
+          )
+        );
+      }
     }
+
+    await Promise.all(promises);
+
+    setInsertedSlides((prev) =>
+      prev.map((r) => {
+        if (r.slideObjectId === record.slideObjectId) {
+          return { ...r, values: { ...r.values, ...changes } };
+        }
+        const reusedUpdates: Record<string, string> = {};
+        for (const [fieldName, newValue] of Object.entries(changes)) {
+          const field = template?.fields.find((f) => f.name === fieldName);
+          if (
+            field?.type === 'image' &&
+            r.insertionIndex > record.insertionIndex &&
+            r.imageSuggestions[fieldName]?.reuse_previous_visual
+          ) {
+            reusedUpdates[fieldName] = newValue;
+          }
+        }
+        if (Object.keys(reusedUpdates).length > 0) {
+          return { ...r, values: { ...r.values, ...reusedUpdates } };
+        }
+        return r;
+      })
+    );
   }
 
   async function handleDoneEditing() {
@@ -215,7 +225,7 @@ export function useInsertPhase(
     editingTemplate,
     handlePlanReady,
     handleCancelInsert,
-    handleFieldChange,
+    handleUpdate,
     handleDoneEditing,
   };
 }

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   Divider,
@@ -7,26 +9,41 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import type {
   ImageSuggestion,
   SlideRecord,
   TemplateDefinition,
 } from '@shared/templates/types.js';
 import ImageField from './ImageField.js';
+import { useDirtyForm } from './useDirtyForm.js';
 
 interface EditViewProps {
   slideRecord: SlideRecord | null;
   template: TemplateDefinition | null;
-  onFieldChange: (fieldName: string, newValue: string) => void;
+  onUpdate: (changes: Record<string, string>) => Promise<void>;
   onDone: () => void;
 }
 
 export function EditView({
   slideRecord,
   template,
-  onFieldChange,
+  onUpdate,
   onDone,
 }: EditViewProps) {
+  const [updating, setUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  const initialValues = Object.fromEntries(
+    (template?.fields ?? []).map((f) => [
+      f.name,
+      slideRecord?.values[f.name] ?? '',
+    ])
+  );
+  const resetKey = slideRecord?.slideObjectId ?? '';
+  const { formValues, setField, dirtyFields, isDirty, resetDirty } =
+    useDirtyForm(initialValues, resetKey);
+
   if (!slideRecord || !template) {
     return (
       <Box
@@ -44,6 +61,19 @@ export function EditView({
     );
   }
 
+  async function handleUpdate() {
+    setUpdating(true);
+    setUpdateError(null);
+    try {
+      await onUpdate(dirtyFields);
+      resetDirty();
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : 'Update failed');
+    } finally {
+      setUpdating(false);
+    }
+  }
+
   return (
     <Box
       key={slideRecord.slideObjectId}
@@ -56,7 +86,7 @@ export function EditView({
     >
       <Group justify='space-between' px='xs' py='xs' style={{ flexShrink: 0 }}>
         <Text size='sm'>{template.name}</Text>
-        <Button size='xs' variant='subtle' onClick={onDone}>
+        <Button size='xs' variant='subtle' onClick={onDone} disabled={updating}>
           Done
         </Button>
       </Group>
@@ -70,7 +100,6 @@ export function EditView({
           template.fields
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((field) => {
-              const currentValue = slideRecord.values[field.name] ?? '';
               const suggestion: ImageSuggestion | undefined =
                 slideRecord.imageSuggestions[field.name];
               if (field.type === 'image') {
@@ -78,8 +107,8 @@ export function EditView({
                   <ImageField
                     key={field.name}
                     field={field}
-                    value={currentValue}
-                    onChange={(value) => onFieldChange(field.name, value)}
+                    value={formValues[field.name] ?? ''}
+                    onChange={(value) => setField(field.name, value)}
                     hint={
                       suggestion
                         ? suggestion.reuse_previous_visual
@@ -96,19 +125,37 @@ export function EditView({
                   label={field.name}
                   placeholder={`Enter ${field.name}`}
                   required={field.required}
-                  defaultValue={currentValue}
-                  onBlur={(e) => {
-                    const newValue = e.currentTarget.value;
-                    if (newValue !== currentValue) {
-                      onFieldChange(field.name, newValue);
-                    }
-                  }}
+                  value={formValues[field.name] ?? ''}
+                  onChange={(e) => setField(field.name, e.currentTarget.value)}
                   size='xs'
                 />
               );
             })
         )}
       </Stack>
+      <Box p='xs' style={{ flexShrink: 0 }}>
+        {updateError && (
+          <Alert
+            icon={<IconAlertCircle size={14} />}
+            color='red'
+            variant='light'
+            p='xs'
+            mb='xs'
+            withCloseButton
+            onClose={() => setUpdateError(null)}
+          >
+            <Text size='xs'>{updateError}</Text>
+          </Alert>
+        )}
+        <Button
+          fullWidth
+          disabled={!isDirty || updating}
+          loading={updating}
+          onClick={handleUpdate}
+        >
+          Update
+        </Button>
+      </Box>
     </Box>
   );
 }
