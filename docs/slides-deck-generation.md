@@ -15,7 +15,7 @@ slides into a user's active presentation.
    `SlideOps.discoverTemplates()` in Apps Script to read template metadata
    directly from the template deck's speaker notes at runtime. Each slide's
    thumbnail is fetched server-side via `UrlFetchApp` (bypassing Google CDN's
-   cross-origin 429), encoded as a base64 data URL, and cached for 6 hours via
+   cross-origin 429), encoded as a base64 data URL, and cached for 24 hours via
    `CacheService` — so the browser never makes a direct request to Google's CDN.
 3. User picks a template, fills in the fields, and submits. Image fields accept
    a URL or a clipboard paste (Cmd+V) — see
@@ -115,8 +115,12 @@ slides into a user's active presentation.
 Push add-on code to Apps Script via clasp:
 
 ```bash
-pnpm addon:push
+pnpm addon:push                       # main project (Generated Deck - Test)
+pnpm addon:deploy <script-id>         # any other presentation's bound script
 ```
+
+The Stop hook in `.claude/settings.local.json` auto-runs both commands at the
+end of every Claude session — no manual push needed during normal development.
 
 The server must be running with HTTPS (mkcert) so the sidebar iframe can reach
 it from the Google Slides origin.

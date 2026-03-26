@@ -18,6 +18,13 @@ https://docs.google.com/presentation/d/1U_8lwC2qfrhDg6wM2CBnWcN9Cfpol9_B7RgeGn7N
    ```
 2. See `docs/` for project technical details
 
+## Setting up a new slide
+
+- https://script.google.com/
+- Get the BACKEND_BASE_URL and TEMPLATE_PRESENTATION_ID from one of the existing
+  project's `Project Settings` -> `Script Properties`
+- Deploy the addon to the new project using `pnpm addon:deploy <script-id>`
+
 ## Notes
 
 - Root `pnpm dev` runs both frontend and backend dev servers.

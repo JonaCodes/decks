@@ -76,3 +76,26 @@ function updateSlideFieldText(payload) {
 function getSelectedSlidesMetadata() {
   return BatchEditOps.getSelectedSlidesMetadata();
 }
+
+/**
+ * Returns the currently configured template presentation ID, or null if not set.
+ */
+function getTemplatePresentationId() {
+  return (
+    PropertiesService.getScriptProperties().getProperty(
+      'TEMPLATE_PRESENTATION_ID'
+    ) || null
+  );
+}
+
+/**
+ * Saves the template presentation ID to Script Properties.
+ * Receives { id: string } from the iframe via the postMessage bridge.
+ */
+function setTemplatePresentationId(payload) {
+  PropertiesService.getScriptProperties().setProperty(
+    'TEMPLATE_PRESENTATION_ID',
+    payload.id
+  );
+  return { ok: true };
+}

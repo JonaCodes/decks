@@ -8,7 +8,8 @@
     "build": "cd public && pnpm install --frozen-lockfile && pnpm run build && cd .. && cd server && pnpm install --frozen-lockfile && pnpm run build",
     "start": "node server/dist/server.cjs",
     "migrate": "cd server && npx sequelize-cli db:migrate --config config/config.cjs",
-    "addon:push": "cd addon && clasp push"
+    "addon:push": "cd addon && clasp push",
+    "addon:deploy": "cd addon && bash deploy.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

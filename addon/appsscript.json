@@ -1,20 +1,14 @@
 {
-  "timeZone": "America/Los_Angeles",
+  "timeZone": "America/New_York",
   "dependencies": {
     "enabledAdvancedServices": [
       {
         "userSymbol": "Slides",
-        "serviceId": "slides",
-        "version": "v1"
+        "version": "v1",
+        "serviceId": "slides"
       }
     ]
   },
   "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8",
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/presentations",
-    "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/script.container.ui",
-    "https://www.googleapis.com/auth/script.external_request"
-  ]
+  "runtimeVersion": "V8"
 }
