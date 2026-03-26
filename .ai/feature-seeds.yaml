@@ -1,0 +1,19 @@
+features:
+  - name: Insert slide from template
+    description:
+      Allows the user to select a template slide from a scrollable list. After
+      selecting, the slide's fields appear as a simple form which the user can
+      fill in, including pasting images/image URLs. On insert, the slide is
+      added asynchrounsly so the user can add multiple slides at once.
+  - name: Auto populate slides from generated JSON
+    description:
+      Allows the user to paste a JSON list of objects, each one with all the
+      required fields needed to generate a slide from a template.
+  - name: Batch edit slides
+    description:
+      Allows the user to select multiple slides and edit shared fields in one
+      click.
+  - name: Template sync and prompt generation
+    description:
+      Allows the user to sync templates fields from the template deck, and
+      generate a prompt that will allow them to create a JSON list of slides.

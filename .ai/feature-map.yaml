@@ -1,0 +1,33 @@
+features:
+  - name: "Insert slide from template"
+    description: Select a template from the sidebar, fill its fields including images, and insert slides asynchronously.
+    files:
+      - public/src/addon/BrowseView.tsx
+      - public/src/addon/TemplateForm.tsx
+      - public/src/addon/ImageField.tsx
+      - public/src/addon/useBackgroundInserts.ts
+      - addon/SlideOps.gs
+  - name: "Auto populate slides from generated JSON"
+    description: Paste a JSON slide plan, validate it, insert the generated slides, and edit any remaining fields.
+    files:
+      - public/src/addon/BrowseView.tsx
+      - public/src/addon/ChatBox.tsx
+      - public/src/addon/useInsertPhase.ts
+      - public/src/addon/EditView.tsx
+      - addon/SlideOps.gs
+  - name: "Batch edit slides"
+    description: Load selected template slides, expose their shared text fields, and apply one update across the selection.
+    files:
+      - public/src/addon/BrowseView.tsx
+      - public/src/addon/useBatchEdit.ts
+      - public/src/addon/BatchEditView.tsx
+      - addon/BatchEditOps.gs
+      - addon/SlideHelpers.gs
+  - name: "Template sync and prompt generation"
+    description: Discover templates from the source deck, sync them into the prompt catalog, and generate the planning prompt text.
+    files:
+      - public/src/addon/AddonApp.tsx
+      - public/src/addon/bridge.ts
+      - addon/SlideOps.gs
+      - server/routes/templates.ts
+      - prompts/slide-planner.ts
