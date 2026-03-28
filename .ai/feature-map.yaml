@@ -1,33 +1,59 @@
 features:
-  - name: "Insert slide from template"
-    description: Select a template from the sidebar, fill its fields including images, and insert slides asynchronously.
-    files:
+  - name: Insert slide from template
+    description: >-
+      Allows the user to select a template slide from a scrollable list. After
+      selecting, the slide's fields appear as a simple form which the user can
+      fill in, including pasting images/image URLs. On insert, the slide is
+      added asynchrounsly so the user can add multiple slides at once.
+    core_files:
       - public/src/addon/BrowseView.tsx
       - public/src/addon/TemplateForm.tsx
-      - public/src/addon/ImageField.tsx
       - public/src/addon/useBackgroundInserts.ts
       - addon/SlideOps.gs
-  - name: "Auto populate slides from generated JSON"
-    description: Paste a JSON slide plan, validate it, insert the generated slides, and edit any remaining fields.
-    files:
-      - public/src/addon/BrowseView.tsx
+    supporting_files:
+      - public/src/addon/ImageField.tsx
+      - public/src/addon/bridge.ts
+      - addon/Sidebar.html
+      - addon/SlideHelpers.gs
+  - name: Auto populate slides from generated JSON
+    description: >-
+      Allows the user to paste a JSON list of objects, each one with all the
+      required fields needed to generate a slide from a template.
+    core_files:
       - public/src/addon/ChatBox.tsx
       - public/src/addon/useInsertPhase.ts
       - public/src/addon/EditView.tsx
       - addon/SlideOps.gs
-  - name: "Batch edit slides"
-    description: Load selected template slides, expose their shared text fields, and apply one update across the selection.
-    files:
-      - public/src/addon/BrowseView.tsx
+    supporting_files:
+      - public/src/addon/InsertProgress.tsx
+      - public/src/addon/bridge.ts
+      - shared/templates/types.ts
+      - addon/Sidebar.html
+  - name: Batch edit slides
+    description: >-
+      Allows the user to select multiple slides and edit shared fields in one
+      click.
+    core_files:
       - public/src/addon/useBatchEdit.ts
       - public/src/addon/BatchEditView.tsx
       - addon/BatchEditOps.gs
-      - addon/SlideHelpers.gs
-  - name: "Template sync and prompt generation"
-    description: Discover templates from the source deck, sync them into the prompt catalog, and generate the planning prompt text.
-    files:
-      - public/src/addon/AddonApp.tsx
+    supporting_files:
       - public/src/addon/bridge.ts
+      - public/src/addon/useDirtyForm.ts
+      - shared/templates/types.ts
+      - addon/SlideHelpers.gs
+  - name: Template sync and prompt generation
+    description: >-
+      Allows the user to sync templates fields from the template deck, and
+      generate a prompt that will allow them to create a JSON list of slides.
+    core_files:
+      - public/src/addon/BrowseView.tsx
+      - public/src/addon/AddonApp.tsx
       - addon/SlideOps.gs
       - server/routes/templates.ts
       - prompts/slide-planner.ts
+    supporting_files:
+      - public/src/addon/bridge.ts
+      - prompts/templates.json
+      - addon/Sidebar.html
+      - shared/templates/types.ts
